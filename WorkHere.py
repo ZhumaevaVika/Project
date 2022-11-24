@@ -1,7 +1,7 @@
 import pygame as pg
 from pygame.math import Vector2
 import math
-from random import randint, randrange
+from random import randint, randrange, choice
 
 #TODO Сделать карту, чтобы экран по ней перемещался, а игрок был в центре
 #TODO Сделать игроку возможность стрелять
@@ -133,20 +133,41 @@ class Pentagon(Food):
         self.rotate()
         self.move()
 
+class Generator():
+    def generate_player(self):
+        player = Player()
+        all_sprites = pg.sprite.Group(player)
+        return player, all_sprites
+
+    def generate_food(self, all_sprites):
+        N_max = 12
+        N_prop = 1
+        variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]*N_prop
+        for i in range(N_max):
+            food = choice(variants)
+            print(food)
+            if food == 0:
+                sq = Square()
+                all_sprites.add(sq)
+            elif food == 1:
+                tr = Triangle()
+                all_sprites.add(tr)
+            else:
+                pn = Pentagon()
+                all_sprites.add(pn)
+        return all_sprites
+
+
 
 
 def main():
     global keys
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
-    player = Player()
-    all_sprites = pg.sprite.Group(player)
-    square = Square()
-    triangle = Triangle()
-    pentagon = Pentagon()
-    all_sprites.add(square)
-    all_sprites.add(triangle)
-    all_sprites.add(pentagon)
+    generator = Generator()
+    player, all_sprites = generator.generate_player()
+    all_sprites = generator.generate_food(all_sprites)
+
     event_mouse = (0, 0)
 
     while True:
