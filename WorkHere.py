@@ -5,7 +5,7 @@ from random import randint, randrange
 
 #TODO Сделать карту, чтобы экран по ней перемещался, а игрок был в центре
 #TODO Сделать игроку возможность стрелять
-#TODO Заспавнить на карте еду (Вика)
+#TODO Заспавнить на карте еду
 
 FPS = 60
 WIDTH = 1000
@@ -92,7 +92,7 @@ class Food(pg.sprite.Sprite):
         self.angle = 0
 
         self.vx = randint(-10, 10)/100
-        self.vy = (0.01-self.vx**2)**0.5
+        self.vy = (0.0101-self.vx**2)**0.5*[-1,1][randrange(2)]
         print(self.vx, self.vy)
 
     def update(self, event):
