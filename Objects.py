@@ -164,7 +164,6 @@ class Bullet(pg.sprite.Sprite):
         self.offset = Vector2(self.l*math.cos(player.angle*6.28/360), self.l*math.sin(player.angle*6.28/360))  # We shift the sprite 50 px to the right.
         self.angle = 0
 
-        self.r = 20
         self.speed = 6
 
     def update(self, event):
@@ -217,4 +216,5 @@ class Generator:
                 all_sprites.add(pn)
         return all_sprites
 
-
+if __name__ == "__main__":
+    print("This module is not for direct call!")
