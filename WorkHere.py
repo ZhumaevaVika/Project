@@ -57,9 +57,7 @@ class Player(pg.sprite.Sprite):
             self.rotate()
 
     def rotate(self):
-        """
-        Rotate the image of the sprite around a pivot point.
-        """
+        """Rotate the image of the sprite around a pivot point."""
         # Rotate the image.
         self.image = pg.transform.rotozoom(self.orig_image, -self.angle, 1)
         # Rotate the offset vector.
