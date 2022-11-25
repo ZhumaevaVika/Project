@@ -1,6 +1,6 @@
 import pygame as pg
 
-from Objects import Generator, Bullet
+from Objects import Generator
 
 # TODO Сделать карту, чтобы экран по ней перемещался, а игрок был в центре
 # TODO Сделать столкновения объектов
