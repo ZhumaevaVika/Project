@@ -143,7 +143,7 @@ class Bullet(pg.sprite.Sprite):
         self.y += self.vy
 
 
-class Generator():
+class Generator:
     def generate_player(self):
         player = Player()
         all_sprites = pg.sprite.Group(player)
