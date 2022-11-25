@@ -57,7 +57,9 @@ class Player(pg.sprite.Sprite):
             self.rotate()
 
     def rotate(self):
-        """Rotate the image of the sprite around a pivot point."""
+        """
+        Rotate the image of the sprite around a pivot point.
+        """
         # Rotate the image.
         self.image = pg.transform.rotozoom(self.orig_image, -self.angle, 1)
         # Rotate the offset vector.
@@ -93,7 +95,6 @@ class Food(pg.sprite.Sprite):
 
         self.vx = randint(-10, 10)/100
         self.vy = (0.0101-self.vx**2)**0.5*[-1,1][randrange(2)]
-        print(self.vx, self.vy)
 
     def update(self, event):
         self.angle += 0.35
@@ -145,7 +146,6 @@ class Generator():
         variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]*N_prop
         for i in range(N_max):
             food = choice(variants)
-            print(food)
             if food == 0:
                 sq = Square()
                 all_sprites.add(sq)
