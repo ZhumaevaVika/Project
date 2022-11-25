@@ -49,15 +49,19 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos + offset_rotated)
 
     def move(self, keys):
+        x = 0
+        y = 0
         if keys[pg.K_w]:
-            self.pos.y -= self.speed
+            y -= 1
         if keys[pg.K_a]:
-            self.pos.x -= self.speed
+            x -=1
         if keys[pg.K_s]:
-            self.pos.y += self.speed
+            y += 1
         if keys[pg.K_d]:
-            self.pos.x += self.speed
-        # FIXME При движении по диагонали скорость увеличивается в 2 раза, надо чтобы она оставалась постоянной
+            x += 1
+        if (x**2 + y**2) > 0:
+            self.pos.x += self.speed * x / (x**2 + y**2)**0.5
+            self.pos.y += self.speed * y / (x**2 + y**2)**0.5
 
 
 class Food(pg.sprite.Sprite):
@@ -165,3 +169,6 @@ class Generator:
                 pn = Pentagon()
                 all_sprites.add(pn)
         return all_sprites
+
+if __name__ == "__main__":
+    print("This module is not for direct call!")
