@@ -2,9 +2,8 @@ import pygame as pg
 
 from Objects import Generator
 
-# TODO Сделать карту, чтобы экран по ней перемещался, а игрок был в центре
 # TODO Сделать столкновения объектов
-# TODO Прописать объектам жизни, дамаг и прочие характеристики (VikaGamer)
+# TODO Проработать level up
 
 FPS = 60
 WIDTH = 1000
@@ -22,16 +21,19 @@ GREY = 0x7D7D7D
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 def main():
+    arr_food = []
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
     generator = Generator()
     player, player_sprites = generator.generate_player()
     all_sprites = pg.sprite.Group()
-    all_sprites = generator.generate_food(all_sprites)
+    all_sprites, arr_food = generator.generate_food(all_sprites, arr_food)
 
     event_mouse = (0, 0)
     time_click_passed = 0
     mouse_up = 1
+    bullets = []
+    bullets_arr = []
 
     while True:
         for event in pg.event.get():
@@ -44,9 +46,14 @@ def main():
             time_click_passed += 1
 
         if pg.mouse.get_pressed()[0]:
-            player.shoot(all_sprites)
+            player.shoot(all_sprites, bullets)
 
         player.if_move()
+        if bullets:
+            for bul in bullets:
+                for food in arr_food:
+                    print(food.pos.x, food.pos.y, bul.pos.x, bul.pos.y)
+                    bul.damage_food(food, bullets, arr_food)
 
         player_sprites.update(event_mouse)
         all_sprites.update(event_mouse)
