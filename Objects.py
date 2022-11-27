@@ -5,11 +5,6 @@ from random import randint, randrange, choice
 
 
 class Player(pg.sprite.Sprite):
-    def if_move(self):
-        keys = pg.key.get_pressed()
-        if keys:
-            self.move(keys)
-
     def __init__(self):
         pos = (500, 375)
         super().__init__()
@@ -27,11 +22,56 @@ class Player(pg.sprite.Sprite):
 
         self.level = 1
         self.XP = 0   # Score
+        self.skill_points = 0
         self.regen = 3.12   # 3.12% per second
+        self.max_HP = 50
         self.HP = 50
         self.BD = 30   # Body_damage 30 HP
-        self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки
-        self.speed = 3
+        self.bullet_speed = 4
+        self.bullet_penetration = 7
+        self.bullet_damage = 7
+        self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
+        self.speed = 3.5   # С увеличением уровня падает скорость
+
+        self.regen_points = 0
+        self.max_HP_points = 0
+        self.BD_points = 0
+        self.bullet_speed_points = 0
+        self.bullet_penetration_points = 0
+        self.bullet_damage_points = 0
+        self.reload_points = 0
+        self.speed_points = 0
+
+    def if_keys(self):
+        keys = pg.key.get_pressed()
+        if keys:
+            self.move(keys)
+
+    def upgrade(self, event):
+        if event.key == pg.K_1:
+            self.health_regen_up()
+            print('regen ', self.regen_points, ' skill points ', self.skill_points)
+        if event.key == pg.K_2:
+            self.max_health_up()
+            print('max HP ', self.max_HP_points, ' skill points ', self.skill_points)
+        if event.key == pg.K_3:
+            self.body_damage_up()
+            print('body damage ', self.BD_points, ' skill points ', self.skill_points)
+        if event.key == pg.K_4:
+            self.bullet_speed_up()
+            print('bullet speed ', self.bullet_speed_points, ' skill points ', self.skill_points)
+        if event.key == pg.K_5:
+            self.bullet_penetration_up()
+            print('bullet penetration ', self.bullet_penetration_points, ' skill points ', self.skill_points)
+        if event.key == pg.K_6:
+            self.bullet_damage_up()
+            print('bullets damage ', self.bullet_damage_points, ' skill points ', self.skill_points)
+        if event.key == pg.K_7:
+            self.reload_up()
+            print('reload ', self.reload_points, ' skill points ', self.skill_points)
+        if event.key == pg.K_8:
+            self.speed_up()
+            print('speed ', self.speed_points, ' skill points ', self.skill_points)
 
     def update(self, event):
         if event == (0, 0):
@@ -47,6 +87,8 @@ class Player(pg.sprite.Sprite):
                 self.angle += 180
             self.rotate()
         self.shoot_delay += 1
+
+        self.level_up()
 
     def rotate(self):
         """Rotate the image of the sprite around a pivot point."""
@@ -95,10 +137,68 @@ class Player(pg.sprite.Sprite):
         return mouse_up, time_click_passed
 
     def level_up(self):
-        score_func = 0.3562*self.level**3 - 5.8423*self.level**2 + 67.4898*self.level - 145.4851
-        if self.XP == int(score_func):
+        score_func = 0.3562*self.level**3 - 5.8423*self.level**2 + 67.4898*self.level - 60
+        if (self.XP >= score_func) and (self.level < 45):
             self.level += 1
-            self.HP = 50 + 2*(self.level-1)
+            self.max_HP = 50 + 2*(self.level-1)
+            if 2 <= self.level <= 28:
+                self.skill_points += 1
+            elif (self.level >= 30) and (self.level % 3 == 0):
+                self.skill_points += 1
+            print('level ', self.level, ' skill points ', self.skill_points)
+
+    def health_regen_up(self):
+        if (self.regen_points < 7) and (self.skill_points > 0):
+            regen_func = -0.0332*self.regen_points**3 + 0.5029*self.regen_points**2 - 0.1154*self.regen_points + 3.12
+            self.regen = int(regen_func*100)//100
+            self.regen_points += 1
+            self.skill_points -= 1
+
+    def max_health_up(self):
+        if (self.max_HP_points < 7) and (self.skill_points > 0):
+            self.max_HP += 20
+            self.HP += 20
+            self.max_HP_points += 1
+            self.skill_points -= 1
+
+    def body_damage_up(self):
+        if (self.BD_points < 7) and (self.skill_points > 0):
+            self.BD += 6
+            self.BD_points += 1
+            self.skill_points -= 1
+
+    def bullet_speed_up(self):
+        if (self.bullet_speed_points < 7) and (self.skill_points > 0):
+            self.bullet_speed += 0.5
+            self.bullet_speed_points += 1
+            self.skill_points -= 1
+
+    def bullet_penetration_up(self):
+        if (self.bullet_penetration_points < 7) and (self.skill_points > 0):
+            self.bullet_penetration += 3
+            self.bullet_penetration_points += 1
+            self.skill_points -= 1
+
+    def bullet_damage_up(self):
+        if (self.bullet_damage_points < 7) and (self.skill_points > 0):
+            self.bullet_damage += 3
+            self.bullet_damage_points += 1
+            self.skill_points -= 1
+
+    def reload_up(self):
+        if (self.reload_points < 7) and (self.skill_points > 0):
+            if self.reload > 28:
+                self.reload -= 2
+            else:
+                self.reload -= 3
+            self.reload_points += 1
+            self.skill_points -= 1
+
+    def speed_up(self):
+        if (self.speed_points < 7) and (self.skill_points > 0):
+            self.speed += 0.5
+            self.speed_points += 1
+            self.skill_points -= 1
 
 
 class Bullet(pg.sprite.Sprite):
@@ -112,20 +212,20 @@ class Bullet(pg.sprite.Sprite):
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.20), int(self.size[1] * 0.20)))
         self.rect = self.orig_image.get_rect()
         self.pos = Vector2(pos)  # The original center position/pivot point.
-        self.l = player.len_gun
-        self.offset = Vector2(self.l*math.cos(player.angle*6.28/360), self.l*math.sin(player.angle*6.28/360))  # We shift the sprite 50 px to the right.
+        self.len = player.len_gun
+        self.offset = Vector2(self.len*math.cos(player.angle*6.28/360), self.len*math.sin(player.angle*6.28/360))
         self.angle = 0
         self.r = 10
 
-        self.speed = 6   # Не точно
-        self.penetration = 7   # Не точно
-        self.damage = 7   # 7 HP
+        self.speed = player.bullet_speed   # Не точно
+        self.penetration = player.bullet_penetration   # Не точно
+        self.damage = player.bullet_damage   # 7 HP
 
     def update(self, event):
         self.rotate()
         self.move()
-        self.penetration -= 0.03
-        self.damage -= 0.03
+        self.penetration -= 0.04
+        self.damage -= 0.04
 
     def rotate(self):
         """Rotate the image of the sprite around a pivot point."""
@@ -149,25 +249,20 @@ class Bullet(pg.sprite.Sprite):
         self.pos.x += self.speed * math.cos(self.angle*6.28/360)
         self.pos.y += self.speed * math.sin(self.angle*6.28/360)
 
-    def damage_food(self, food, bullets, arr_food):
+    def damage_food(self, food, bullets, arr_food, player):
         # FIXME Ваня, хитбоксы у еды при контакте с пулей круглые, ты вроде хотел сделать их по спрайту,
         #  а при соударениях друг с другом круглыми
         if (self.pos.x - food.pos.x)**2 + (self.pos.y - food.pos.y)**2 <= (self.r + food.r)**2:
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
-            food.death(arr_food)
+            food.death(arr_food, player)
+        if self in bullets:
             self.death(bullets)
-            print('Попал')
-            # FIXME self.death(bullets) выполняется только при контакте с едой, если вынести функцию из под условия,
-            #  там непонятно откуда появляется пустой массив (Я с этим разберусь (Вика)).
-            #  Пуля со временем теряет урон по линейной зависимости
-
 
     def death(self, bullets):
         if self.penetration <= 0:
             self.kill()
             bullets.remove(self)
-
 
 
 class Food(pg.sprite.Sprite):
@@ -187,6 +282,7 @@ class Food(pg.sprite.Sprite):
         self.vx = randint(-10, 10) / 100
         self.vy = (0.0101 - self.vx ** 2) ** 0.5 * [-1, 1][randrange(2)]
         self.HP = 10
+        self.XP = 10
 
     def update(self, event):
         self.angle += 0.35
@@ -206,11 +302,11 @@ class Food(pg.sprite.Sprite):
         self.pos.x += self.vx
         self.pos.y += self.vy
 
-    def death(self, arr_food):
+    def death(self, arr_food, player):
         if self.HP <= 0:
             self.kill()
             arr_food.remove(self)
-
+            player.XP += self.XP
 
 
 class Square(Food):
@@ -247,6 +343,7 @@ class Pentagon(Food):
         self.rotate()
         self.move()
 
+
 class AlphaPentagon(Food):
     def __init__(self):
         filename = 'Sprites/AlphaPentagon.png'
@@ -263,16 +360,15 @@ class AlphaPentagon(Food):
 
 
 class Generator:
-
     def generate_player(self):
         player = Player()
         player_sprites = pg.sprite.Group(player)
         return player, player_sprites
 
     def generate_food(self, all_sprites, arr_food):
-        N_max = 12
+        n_max = 12
         variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]
-        for i in range(N_max):
+        for i in range(n_max):
             food = choice(variants)
             if food == 0:
                 sq = Square()
@@ -287,6 +383,7 @@ class Generator:
                 arr_food.append(pn)
                 all_sprites.add(pn)
         return all_sprites, arr_food
+
 
 if __name__ == "__main__":
     print("This module is not for direct call!")

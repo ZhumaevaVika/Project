@@ -2,8 +2,12 @@ import pygame as pg
 
 from Objects import Generator
 
-# TODO Сделать столкновения объектов
-# TODO Проработать level up
+# TODO Сделать столкновения объектов, добавить танку хитбокс.
+#  При контакте игрока с едой оба получают урон (body_damage/BD) (Ваня)
+# TODO Сделать health bar, показатели уровня и счета в нижней части экрана (Максим)
+# TODO Сделать возможность выбора класса танка (Вика)
+# TODO Добавить ботов (для начала с простым интеллектом,
+#  по типу рандомный спавн со случайным уровнем и прокачкой, едут за игроком и стреляют в него)
 
 FPS = 60
 WIDTH = 1000
@@ -33,7 +37,6 @@ def main():
     time_click_passed = 0
     mouse_up = 1
     bullets = []
-    bullets_arr = []
 
     while True:
         for event in pg.event.get():
@@ -41,6 +44,9 @@ def main():
                 return
             elif event.type == pg.MOUSEMOTION:
                 event_mouse = event
+            elif event.type == pg.KEYDOWN:
+                event_keydown = event
+                player.upgrade(event_keydown)
             mouse_up, time_click_passed = player.get_shoot_delay(event, time_click_passed, mouse_up)
         if mouse_up:
             time_click_passed += 1
@@ -48,12 +54,11 @@ def main():
         if pg.mouse.get_pressed()[0]:
             player.shoot(all_sprites, bullets)
 
-        player.if_move()
+        player.if_keys()
         if bullets:
             for bul in bullets:
                 for food in arr_food:
-                    print(food.pos.x, food.pos.y, bul.pos.x, bul.pos.y)
-                    bul.damage_food(food, bullets, arr_food)
+                    bul.damage_food(food, bullets, arr_food, player)
 
         player_sprites.update(event_mouse)
         all_sprites.update(event_mouse)
