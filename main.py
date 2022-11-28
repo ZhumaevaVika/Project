@@ -24,12 +24,15 @@ WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
+
 def main():
     arr_food = []
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
     generator = Generator()
-    player, player_sprites = generator.generate_player()
+    player = None
+    player, player_sprites = generator.generate_player('Player', player)
+    # player_sprites.add(Player())
     all_sprites = pg.sprite.Group()
     all_sprites, arr_food = generator.generate_food(all_sprites, arr_food)
 
@@ -47,6 +50,7 @@ def main():
             elif event.type == pg.KEYDOWN:
                 event_keydown = event
                 player.upgrade(event_keydown)
+                player, player_sprites = player.chose_class(event_keydown, player, player_sprites)
             mouse_up, time_click_passed = player.get_shoot_delay(event, time_click_passed, mouse_up)
         if mouse_up:
             time_click_passed += 1

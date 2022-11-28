@@ -4,9 +4,11 @@ import math
 from random import randint, randrange, choice
 
 
+# FIXME (не баг, а фича)) При смене класса сбрасывается прокачка, skill points остаются
+
+
 class Player(pg.sprite.Sprite):
-    def __init__(self):
-        pos = (500, 375)
+    def __init__(self, player):
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
         # A reference to the original image to preserve the quality.
@@ -14,24 +16,24 @@ class Player(pg.sprite.Sprite):
         self.size = self.orig_image.get_size()
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.rect = self.orig_image.get_rect()
-        self.pos = Vector2(pos)  # The original center position/pivot point.
+        if player is None:
+            self.pos = Vector2(500, 375)
+        else:
+            self.pos = Vector2(player.pos)
         self.offset = Vector2(9, 1)  # We shift the sprite 50 px to the right.
         self.angle = 0
         self.len_gun = 35
         self.shoot_delay = 0
 
-        self.level = 1
-        self.XP = 0   # Score
-        self.skill_points = 0
-        self.regen = 3.12   # 3.12% per second
+        self.regen = 3.12  # 3.12% per second
         self.max_HP = 50
         self.HP = 50
-        self.BD = 30   # Body_damage 30 HP
+        self.BD = 30  # Body_damage 30 HP
         self.bullet_speed = 4
         self.bullet_penetration = 7
         self.bullet_damage = 7
         self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
-        self.speed = 3.5   # С увеличением уровня падает скорость
+        self.speed = 3.5  # С увеличением уровня падает скорость
 
         self.regen_points = 0
         self.max_HP_points = 0
@@ -41,6 +43,15 @@ class Player(pg.sprite.Sprite):
         self.bullet_damage_points = 0
         self.reload_points = 0
         self.speed_points = 0
+
+        if player is None:
+            self.level = 1
+            self.XP = 0  # Score
+            self.skill_points = 0
+        else:
+            self.level = player.level
+            self.XP = player.XP
+            self.skill_points = player.skill_points
 
     def if_keys(self):
         keys = pg.key.get_pressed()
@@ -72,6 +83,25 @@ class Player(pg.sprite.Sprite):
         if event.key == pg.K_8:
             self.speed_up()
             print('speed ', self.speed_points, ' skill points ', self.skill_points)
+
+    def chose_class(self, event, player, player_sprites):
+        generator = Generator()
+        if event.key == pg.K_g:
+            player_sprites.remove(self)
+            player, player_sprites = generator.generate_player('Player', self)
+        if event.key == pg.K_h:
+            player_sprites.remove(self)
+            player, player_sprites = generator.generate_player('Twin', self)
+        if event.key == pg.K_j:
+            player_sprites.remove(self)
+            player, player_sprites = generator.generate_player('Sniper', self)
+        if event.key == pg.K_k:
+            player_sprites.remove(self)
+            player, player_sprites = generator.generate_player('MachineGun', self)
+        if event.key == pg.K_l:
+            player_sprites.remove(self)
+            player, player_sprites = generator.generate_player('FlankGuard', self)
+        return player, player_sprites
 
     def update(self, event):
         if event == (0, 0):
@@ -137,10 +167,10 @@ class Player(pg.sprite.Sprite):
         return mouse_up, time_click_passed
 
     def level_up(self):
-        score_func = 0.3562*self.level**3 - 5.8423*self.level**2 + 67.4898*self.level - 60
+        score_func = 0.3562 * self.level ** 3 - 5.8423 * self.level ** 2 + 67.4898 * self.level - 60
         if (self.XP >= score_func) and (self.level < 45):
             self.level += 1
-            self.max_HP = 50 + 2*(self.level-1)
+            self.max_HP = 50 + 2 * (self.level - 1)
             if 2 <= self.level <= 28:
                 self.skill_points += 1
             elif (self.level >= 30) and (self.level % 3 == 0):
@@ -149,8 +179,9 @@ class Player(pg.sprite.Sprite):
 
     def health_regen_up(self):
         if (self.regen_points < 7) and (self.skill_points > 0):
-            regen_func = -0.0332*self.regen_points**3 + 0.5029*self.regen_points**2 - 0.1154*self.regen_points + 3.12
-            self.regen = int(regen_func*100)//100
+            regen_func = -0.0332 * self.regen_points ** 3 + 0.5029 * self.regen_points ** 2\
+                         - 0.1154 * self.regen_points + 3.12
+            self.regen = int(regen_func * 100) // 100
             self.regen_points += 1
             self.skill_points -= 1
 
@@ -213,13 +244,14 @@ class Bullet(pg.sprite.Sprite):
         self.rect = self.orig_image.get_rect()
         self.pos = Vector2(pos)  # The original center position/pivot point.
         self.len = player.len_gun
-        self.offset = Vector2(self.len*math.cos(player.angle*6.28/360), self.len*math.sin(player.angle*6.28/360))
+        self.offset = Vector2(self.len * math.cos(player.angle * 6.28 / 360),
+                              self.len * math.sin(player.angle * 6.28 / 360))
         self.angle = 0
         self.r = 10
 
-        self.speed = player.bullet_speed   # Не точно
-        self.penetration = player.bullet_penetration   # Не точно
-        self.damage = player.bullet_damage   # 7 HP
+        self.speed = player.bullet_speed  # Не точно
+        self.penetration = player.bullet_penetration  # Не точно
+        self.damage = player.bullet_damage  # 7 HP
 
     def update(self, event):
         self.rotate()
@@ -246,13 +278,13 @@ class Bullet(pg.sprite.Sprite):
             self.angle += 180
 
     def move(self):
-        self.pos.x += self.speed * math.cos(self.angle*6.28/360)
-        self.pos.y += self.speed * math.sin(self.angle*6.28/360)
+        self.pos.x += self.speed * math.cos(self.angle * 6.28 / 360)
+        self.pos.y += self.speed * math.sin(self.angle * 6.28 / 360)
 
     def damage_food(self, food, bullets, arr_food, player):
         # FIXME Ваня, хитбоксы у еды при контакте с пулей круглые, ты вроде хотел сделать их по спрайту,
         #  а при соударениях друг с другом круглыми
-        if (self.pos.x - food.pos.x)**2 + (self.pos.y - food.pos.y)**2 <= (self.r + food.r)**2:
+        if (self.pos.x - food.pos.x) ** 2 + (self.pos.y - food.pos.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
             food.death(arr_food, player)
@@ -263,6 +295,181 @@ class Bullet(pg.sprite.Sprite):
         if self.penetration <= 0:
             self.kill()
             bullets.remove(self)
+
+
+class Twin(Player):
+    def __init__(self, player):
+        super().__init__(player)
+        self.pos = player.pos
+        self.orig_image = pg.image.load('Sprites/Twin.png')
+        self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
+        self.offset = Vector2(9, 1)
+        self.len_gun = 35
+
+        self.reload = 18
+        self.bullet_damage = 6
+
+        self.level = player.level
+        self.XP = player.XP
+        self.skill_points = player.skill_points
+
+    def shoot(self, all_sprites, bullets):
+        try:
+            if self.shoot_delay % self.reload == 0:
+                bullet = TwinBullet(self)
+                bullets.append(bullet)
+                all_sprites.add(bullet)
+                bullet.angle_update(pg.mouse.get_pos())
+        except AttributeError:
+            pass
+
+    def reload_up(self):
+        if (self.reload_points < 7) and (self.skill_points > 0):
+            self.reload -= 1
+            self.reload_points += 1
+            self.skill_points -= 1
+
+    def bullet_damage_up(self):
+        if (self.bullet_damage_points < 7) and (self.skill_points > 0):
+            self.bullet_damage += 2.5
+            self.bullet_damage_points += 1
+            self.skill_points -= 1
+
+
+class TwinBullet(Bullet):
+    def __init__(self, player):
+        super().__init__(player)
+        self.offset1 = Vector2(
+            self.len * math.cos(player.angle * 6.28 / 360) - 12 * math.sin(player.angle * 6.28 / 360),
+            self.len * math.sin(player.angle * 6.28 / 360) + 12 * math.cos(player.angle * 6.28 / 360))
+        self.offset2 = Vector2(
+            self.len * math.cos(player.angle * 6.28 / 360) + 12 * math.sin(player.angle * 6.28 / 360),
+            self.len * math.sin(player.angle * 6.28 / 360) - 12 * math.cos(player.angle * 6.28 / 360))
+        self.offset = choice([self.offset1, self.offset2])  # FIXME Сделать, чтоб по очереди стрелял из пушек
+
+
+class Sniper(Player):
+    def __init__(self, player):
+        super().__init__(player)
+        self.pos = player.pos
+        self.orig_image = pg.image.load('Sprites/Sniper.png')
+        self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.4), int(self.size[1] * 0.36)))
+        self.offset = Vector2(13, 1)
+        self.len_gun = 35
+
+        self.bullet_speed = 6
+        self.reload = 48
+
+        self.level = player.level
+        self.XP = player.XP
+        self.skill_points = player.skill_points
+
+    def bullet_speed_up(self):
+        if (self.bullet_speed_points < 7) and (self.skill_points > 0):
+            self.bullet_speed += 0.65
+            self.bullet_speed_points += 1
+            self.skill_points -= 1
+
+
+class MachineGun(Player):
+    def __init__(self, player):
+        super().__init__(player)
+        self.pos = player.pos
+        self.orig_image = pg.image.load('Sprites/MachineGun.png')
+        self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
+        self.offset = Vector2(9, 1)
+        self.len_gun = 35
+
+        self.reload = 18
+        self.bullet_damage = 6.5
+
+        self.level = player.level
+        self.XP = player.XP
+        self.skill_points = player.skill_points
+
+    def shoot(self, all_sprites, bullets):
+        try:
+            if self.shoot_delay % self.reload == 0:
+                bullet = MachineGunBullet(self)
+                bullets.append(bullet)
+                all_sprites.add(bullet)
+                bullet.angle_update(pg.mouse.get_pos())
+        except AttributeError:
+            pass
+
+    def reload_up(self):
+        if (self.reload_points < 7) and (self.skill_points > 0):
+            self.reload -= 1
+            self.reload_points += 1
+            self.skill_points -= 1
+
+    def bullet_damage_up(self):
+        if (self.bullet_damage_points < 7) and (self.skill_points > 0):
+            self.bullet_damage += 2.75
+            self.bullet_damage_points += 1
+            self.skill_points -= 1
+
+
+class MachineGunBullet(Bullet):
+    def __init__(self, player):
+        super().__init__(player)
+
+    def angle_update(self, event):
+        if event[0] != self.pos.x:
+            self.angle = math.atan((event[1] - self.pos.y) / (event[0] - self.pos.x))
+        elif event[0] == self.pos.x:
+            self.angle = -80 * (event[1] - self.pos.y) / abs(event[1] - self.pos.y)
+        self.angle = self.angle * 360 / 6.28
+        if event[0] < self.pos.x:
+            self.angle += 180
+        self.angle += randint(-20, 20)
+
+
+class FlankGuard(Player):
+    def __init__(self, player):
+        super().__init__(player)
+        self.pos = player.pos
+        self.orig_image = pg.image.load('Sprites/FlankGuard.png')
+        self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.44), int(self.size[1] * 0.36)))
+        self.offset = Vector2(4, 1)
+        self.len_gun = 35
+
+        self.level = player.level
+        self.XP = player.XP
+        self.skill_points = player.skill_points
+
+    def shoot(self, all_sprites, bullets):
+        try:
+            if self.shoot_delay % self.reload == 0:
+                bullet_front = FlankGuardBulletFront(self)
+                bullets.append(bullet_front)
+                all_sprites.add(bullet_front)
+                bullet_front.angle_update(pg.mouse.get_pos())
+
+                bullet_back = FlankGuardBulletBack(self)
+                bullets.append(bullet_back)
+                all_sprites.add(bullet_back)
+                bullet_back.angle_update(pg.mouse.get_pos())
+        except AttributeError:
+            pass
+
+
+class FlankGuardBulletFront(Bullet):
+    def __init__(self, player):
+        super().__init__(player)
+        self.offset = Vector2(self.len * math.cos(player.angle * 6.28 / 360),
+                              self.len * math.sin(player.angle * 6.28 / 360))
+
+
+class FlankGuardBulletBack(Bullet):
+    def __init__(self, player):
+        super().__init__(player)
+        self.offset = Vector2(self.len * -math.cos(player.angle * 6.28 / 360),
+                              self.len * -math.sin(player.angle * 6.28 / 360))
+
+    def move(self):
+        self.pos.x += self.speed * -math.cos(self.angle * 6.28 / 360)
+        self.pos.y += self.speed * -math.sin(self.angle * 6.28 / 360)
 
 
 class Food(pg.sprite.Sprite):
@@ -314,8 +521,8 @@ class Square(Food):
         filename = 'Sprites/Square.png'
         super().__init__(filename)
         self.HP = 10
-        self.BD = 8   # Body_damage 8 HP
-        self.XP = 10   # Score
+        self.BD = 8  # Body_damage 8 HP
+        self.XP = 10  # Score
         self.r = 19
 
 
@@ -324,8 +531,8 @@ class Triangle(Food):
         filename = 'Sprites/Triangle.png'
         super().__init__(filename)
         self.HP = 30
-        self.BD = 8   # Body_damage 8 HP
-        self.XP = 25   # Score
+        self.BD = 8  # Body_damage 8 HP
+        self.XP = 25  # Score
         self.r = 22
 
 
@@ -334,7 +541,7 @@ class Pentagon(Food):
         filename = 'Sprites/Pentagon.png'
         super().__init__(filename)
         self.HP = 100
-        self.BD = 12   # Body_damage
+        self.BD = 12  # Body_damage
         self.XP = 130
         self.r = 33
 
@@ -349,7 +556,7 @@ class AlphaPentagon(Food):
         filename = 'Sprites/AlphaPentagon.png'
         super().__init__(filename)
         self.HP = 3000
-        self.BD = 20   # Body_damage
+        self.BD = 20  # Body_damage
         self.XP = 3000
         self.r = 85
 
@@ -360,9 +567,22 @@ class AlphaPentagon(Food):
 
 
 class Generator:
-    def generate_player(self):
-        player = Player()
-        player_sprites = pg.sprite.Group(player)
+    def generate_player(self, type, player):
+        if type == 'Player':
+            player = Player(player)
+            player_sprites = pg.sprite.Group(player)
+        if type == 'Twin':
+            player = Twin(player)
+            player_sprites = pg.sprite.Group(player)
+        if type == 'Sniper':
+            player = Sniper(player)
+            player_sprites = pg.sprite.Group(player)
+        if type == 'MachineGun':
+            player = MachineGun(player)
+            player_sprites = pg.sprite.Group(player)
+        if type == 'FlankGuard':
+            player = FlankGuard(player)
+            player_sprites = pg.sprite.Group(player)
         return player, player_sprites
 
     def generate_food(self, all_sprites, arr_food):
