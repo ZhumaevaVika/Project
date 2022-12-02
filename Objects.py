@@ -198,6 +198,7 @@ class Player(pg.sprite.Sprite):
             print('level ', self.level, ' skill points ', self.skill_points)
          
 
+
     def health_regen_up(self):
         if (self.regen_points < 7) and (self.skill_points > 0):
             regen_func = -0.0332 * self.regen_points ** 3 + 0.5029 * self.regen_points ** 2\
