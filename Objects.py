@@ -84,7 +84,7 @@ class Player(pg.sprite.Sprite):
             self.speed_up()
             print('speed ', self.speed_points, ' skill points ', self.skill_points)
 
-    def chose_class(self, event, player, player_sprites):
+    def choose_class(self, event, player, player_sprites):
         generator = Generator()
         if event.key == pg.K_g:
             player_sprites.remove(self)
@@ -284,7 +284,14 @@ class Bullet(pg.sprite.Sprite):
     def damage_food(self, food, bullets, arr_food, player):
         # FIXME Ваня, хитбоксы у еды при контакте с пулей круглые, ты вроде хотел сделать их по спрайту,
         #  а при соударениях друг с другом круглыми
-        if (self.pos.x - food.pos.x) ** 2 + (self.pos.y - food.pos.y) ** 2 <= (self.r + food.r) ** 2:
+        def inPolygon(x, y, tpx, tpy):
+            c=0
+            for i in range(len(tpx)):
+                if (((tpy[i]<=y and y<tpy[i-1]) or (tpy[i-1]<=y and y<tpy[i])) and (x > (tpx[i-1] - tpx[i]) * (y - tpy[i]) / (tpy[i-1] - tpy[i]) + tpx[i])): 
+                    c = 1 - c    
+            if c == 1: 
+                return True
+        if inPolygon(self.pos.x, self.pos.y, food.tpx, food.tpy):
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
             food.death(arr_food, player)
@@ -475,6 +482,7 @@ class FlankGuardBulletBack(Bullet):
 class Food(pg.sprite.Sprite):
     def __init__(self, filename):
         super().__init__()
+        self.screen = pg.display.set_mode((1000, 750))
         pos = (randint(50, 950), randint(50, 700))
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
         # A reference to the original image to preserve the quality.
@@ -485,6 +493,7 @@ class Food(pg.sprite.Sprite):
         self.pos = Vector2(pos)  # The original center position/pivot point.
         self.offset = Vector2(0, 0)  # We shift the sprite 50 px to the right.
         self.angle = randint(-180, 180)
+        self.a = 30
 
         self.vx = randint(-10, 10) / 100
         self.vy = (0.0101 - self.vx ** 2) ** 0.5 * [-1, 1][randrange(2)]
@@ -496,6 +505,7 @@ class Food(pg.sprite.Sprite):
         self.rotate()
         self.move()
 
+
     def rotate(self):
         """Rotate the image of the sprite around a pivot point."""
         # Rotate the image.
@@ -504,6 +514,7 @@ class Food(pg.sprite.Sprite):
         offset_rotated = self.offset.rotate(self.angle)
         # Create a new rect with the center of the sprite + the offset.
         self.rect = self.image.get_rect(center=self.pos + offset_rotated)
+
 
     def move(self):
         self.pos.x += self.vx
@@ -515,6 +526,9 @@ class Food(pg.sprite.Sprite):
             arr_food.remove(self)
             player.XP += self.XP
 
+    def hit(self, arr_food, player):
+        pass
+
 
 class Square(Food):
     def __init__(self):
@@ -524,6 +538,27 @@ class Square(Food):
         self.BD = 8  # Body_damage 8 HP
         self.XP = 10  # Score
         self.r = 19
+        self.a = 26 + 10
+        self.tpx = []
+        self.tpy = []
+
+    def update(self, event):
+        self.angle += 0.35
+        self.rotate()
+        self.move()       
+        angle = self.angle * math.pi / 180 + 0.8
+        x = self.pos.x
+        y = self.pos.y
+        self.tpx = [x + self.a * math.cos(angle), 
+                    x + self.a * math.cos(angle + 1 * 2*math.pi/4),
+                    x + self.a * math.cos(angle + 2 * 2*math.pi/4),
+                    x + self.a * math.cos(angle + 3 * 2*math.pi/4)
+                    ]
+        self.tpy = [y + self.a * math.sin(angle),
+                    y + self.a * math.sin(angle + 1 * 2*math.pi/4),
+                    y + self.a * math.sin(angle + 2 * 2*math.pi/4),
+                    y + self.a * math.sin(angle + 3 * 2*math.pi/4)
+                    ]
 
 
 class Triangle(Food):
@@ -534,6 +569,25 @@ class Triangle(Food):
         self.BD = 8  # Body_damage 8 HP
         self.XP = 25  # Score
         self.r = 22
+        self.a = 22 + 10
+        self.tpx = []
+        self.tpy = []
+        
+    def update(self, event):
+        self.angle += 0.35
+        self.rotate()
+        self.move()
+        angle = self.angle * math.pi / 180 + 0.5
+        x = self.pos.x
+        y = self.pos.y
+        self.tpx = [x +self.a * math.cos(angle),
+                    x +self.a * math.cos(angle + 1 * 2*math.pi/3),
+                    x +self.a * math.cos(angle + 2 * 2*math.pi/3)
+                    ]
+        self.tpy = [y + self.a * math.sin(angle), 
+                    y + self.a * math.sin(angle + 1 * 2*math.pi/3), 
+                    y + self.a * math.sin(angle + 2 * 2*math.pi/3)
+                    ]
 
 
 class Pentagon(Food):
@@ -544,11 +598,29 @@ class Pentagon(Food):
         self.BD = 12  # Body_damage
         self.XP = 130
         self.r = 33
+        self.a = 33 + 10
+        self.tpx = []
+        self.tpy = []
 
     def update(self, event):
         self.angle += 0.15
         self.rotate()
         self.move()
+        angle = self.angle * math.pi / 180 - 0.32
+        x = self.pos.x
+        y = self.pos.y
+        self.tpx = [x + self.a * math.cos(angle),
+                    x + self.a * math.cos(angle + 1 * 2*math.pi/5),
+                    x + self.a * math.cos(angle + 2 * 2*math.pi/5),
+                    x + self.a * math.cos(angle + 3 * 2*math.pi/5),
+                    x + self.a * math.cos(angle + 4 * 2*math.pi/5)
+                    ]
+        self.tpy = [y + self.a * math.sin(angle),
+                    y + self.a * math.sin(angle + 1 * 2*math.pi/5),
+                    y + self.a * math.sin(angle + 2 * 2*math.pi/5),
+                    y + self.a * math.sin(angle + 3 * 2*math.pi/5),
+                    y + self.a * math.sin(angle + 4 * 2*math.pi/5)
+                    ]
 
 
 class AlphaPentagon(Food):
@@ -559,11 +631,29 @@ class AlphaPentagon(Food):
         self.BD = 20  # Body_damage
         self.XP = 3000
         self.r = 85
+        self.a = 85 + 10
+        self.tpx = []
+        self.tpy = []
 
     def update(self, event):
         self.angle += 0.10
         self.rotate()
-        self.move()
+        self.move()       
+        angle = self.angle * math.pi / 180 - 0.32
+        x = self.pos.x
+        y = self.pos.y
+        self.tpx = [x + self.a * math.cos(angle),
+                    x + self.a * math.cos(angle + 1 * 2*math.pi/5),
+                    x + self.a * math.cos(angle + 2 * 2*math.pi/5),
+                    x + self.a * math.cos(angle + 3 * 2*math.pi/5),
+                    x + self.a * math.cos(angle + 4 * 2*math.pi/5)
+                    ]
+        self.tpy = [y + self.a * math.sin(angle),
+                    y + self.a * math.sin(angle + 1 * 2*math.pi/5),
+                    y + self.a * math.sin(angle + 2 * 2*math.pi/5),
+                    y + self.a * math.sin(angle + 3 * 2*math.pi/5),
+                    y + self.a * math.sin(angle + 4 * 2*math.pi/5)
+                    ]
 
 
 class Generator:

@@ -50,7 +50,7 @@ def main():
             elif event.type == pg.KEYDOWN:
                 event_keydown = event
                 player.upgrade(event_keydown)
-                player, player_sprites = player.chose_class(event_keydown, player, player_sprites)
+                player, player_sprites = player.choose_class(event_keydown, player, player_sprites)
             mouse_up, time_click_passed = player.get_shoot_delay(event, time_click_passed, mouse_up)
         if mouse_up:
             time_click_passed += 1
@@ -65,8 +65,8 @@ def main():
                     bul.damage_food(food, bullets, arr_food, player)
 
         player_sprites.update(event_mouse)
-        all_sprites.update(event_mouse)
         screen.fill(WHITE)
+        all_sprites.update(event_mouse)
         all_sprites.draw(screen)
         player_sprites.draw(screen)
         pg.display.flip()
