@@ -1,6 +1,7 @@
 import pygame as pg
 
 from Objects import Generator
+from Visuals import draw_bottom_interface # подключил функцию из нового файлика (коммит с health bar)
 
 # TODO Сделать столкновения объектов, добавить танку хитбокс.
 #  При контакте игрока с едой оба получают урон (body_damage/BD) (Ваня)
@@ -69,6 +70,7 @@ def main():
         all_sprites.update(event_mouse)
         all_sprites.draw(screen)
         player_sprites.draw(screen)
+        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000)  # вот что добавлено (коммит с health bar)
         pg.display.flip()
         clock.tick(FPS)
 
