@@ -65,8 +65,9 @@ def main():
                 for food in arr_food:
                     bul.damage_food(food, bullets, arr_food, player)
 
+        player.hit_food(arr_food)
         player_sprites.update(event_mouse)
-        screen.fill(WHITE)
+        screen.fill(BLACK)
         all_sprites.update(event_mouse)
         all_sprites.draw(screen)
         player_sprites.draw(screen)

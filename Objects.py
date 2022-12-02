@@ -34,6 +34,8 @@ class Player(pg.sprite.Sprite):
         self.bullet_damage = 7
         self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
         self.speed = 3.5  # С увеличением уровня падает скорость
+        self.m = 50
+        self.impulse = 200
 
         self.regen_points = 0
         self.max_HP_points = 0
@@ -52,6 +54,22 @@ class Player(pg.sprite.Sprite):
             self.level = player.level
             self.XP = player.XP
             self.skill_points = player.skill_points
+
+    def hit_food(self, arr_food):
+        def inPolygon(x, y, tpx, tpy):
+            c=0
+            for i in range(len(tpx)):
+                if (((tpy[i]<=y and y<tpy[i-1]) or (tpy[i-1]<=y and y<tpy[i])) and (x > (tpx[i-1] - tpx[i]) * (y - tpy[i]) / (tpy[i-1] - tpy[i]) + tpx[i])): 
+                    c = 1 - c    
+            if c == 1: 
+                return True
+        for food in arr_food:
+            if inPolygon(self.pos.x, self.pos.y, food.tpx, food.tpy):
+                food.HP -= min(self.BD, food.HP)
+                food.death(arr_food, self)
+                print(food.HP)
+                print("obama")
+
 
     def if_keys(self):
         keys = pg.key.get_pressed()
@@ -117,7 +135,6 @@ class Player(pg.sprite.Sprite):
                 self.angle += 180
             self.rotate()
         self.shoot_delay += 1
-
         self.level_up()
 
     def rotate(self):
@@ -171,11 +188,15 @@ class Player(pg.sprite.Sprite):
         if (self.XP >= score_func) and (self.level < 45):
             self.level += 1
             self.max_HP = 50 + 2 * (self.level - 1)
+            self.m += 5
+            print(self.speed)
+            self.speed = self.impulse / self.m
             if 2 <= self.level <= 28:
                 self.skill_points += 1
             elif (self.level >= 30) and (self.level % 3 == 0):
                 self.skill_points += 1
             print('level ', self.level, ' skill points ', self.skill_points)
+         
 
     def health_regen_up(self):
         if (self.regen_points < 7) and (self.skill_points > 0):
@@ -227,7 +248,7 @@ class Player(pg.sprite.Sprite):
 
     def speed_up(self):
         if (self.speed_points < 7) and (self.skill_points > 0):
-            self.speed += 0.5
+            self.impulse += 50
             self.speed_points += 1
             self.skill_points -= 1
 
