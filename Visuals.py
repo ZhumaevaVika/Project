@@ -32,7 +32,8 @@ def draw_bar_with_text(screen, position, width, height, color, value, max_value,
     text_main = font.render(text, True, color_white)
     text_add = font.render(text, True, color_gray)
     # Gray borders of health bar line
-    pygame.draw.line(screen, color_gray, (position[0] - width//2, position[1]), (position[0] + width//2, position[1]), height)
+    pygame.draw.line(screen, color_gray, (position[0] - width//2, position[1]),
+                     (position[0] + width//2, position[1]), height)
     pygame.draw.circle(screen, color_gray, (position[0] - width//2, position[1] + 1), height//2)
     pygame.draw.circle(screen, color_gray, (position[0] + width//2, position[1] + 1), height//2)
     # Health bar line
@@ -63,4 +64,3 @@ def draw_bottom_interface(player, width, height, screen, top_score):
     draw_bar_with_text(screen, (width//2, height - 45), 150, 12, (151, 255, 158), player.XP, top_score,
                        "Score: " + str(player.XP))
     draw_text(screen, (width//2, height - 60), 20, "Name")  # FIXME поменять имя игрока
-
