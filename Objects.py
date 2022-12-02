@@ -12,14 +12,12 @@ class Player(pg.sprite.Sprite):
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
         # A reference to the original image to preserve the quality.
-        self.orig_image = pg.image.load('Sprites/Tank.png')
+        self.orig_image = pg.image.load('Sprites/tank.png')
         self.size = self.orig_image.get_size()
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.rect = self.orig_image.get_rect()
-        if player is None:
-            self.pos = Vector2(500, 375)
-        else:
-            self.pos = Vector2(player.pos)
+        self.pos_render = Vector2(500, 375)
+        self.pos = Vector2(randint(50, 9500), randint(50, 9500))
         self.offset = Vector2(9, 1)  # We shift the sprite 50 px to the right.
         self.angle = 0
         self.len_gun = 35
@@ -59,6 +57,7 @@ class Player(pg.sprite.Sprite):
             self.move(keys)
 
     def upgrade(self, event):
+        # FIXME При смене класса танка сбрасывается прокачка
         if event.key == pg.K_1:
             self.health_regen_up()
             print('regen ', self.regen_points, ' skill points ', self.skill_points)
@@ -84,7 +83,7 @@ class Player(pg.sprite.Sprite):
             self.speed_up()
             print('speed ', self.speed_points, ' skill points ', self.skill_points)
 
-    def choose_class(self, event, player, player_sprites):
+    def chose_class(self, event, player, player_sprites):
         generator = Generator()
         if event.key == pg.K_g:
             player_sprites.remove(self)
@@ -108,12 +107,12 @@ class Player(pg.sprite.Sprite):
             self.angle = 0
             self.rotate()
         else:
-            if event.pos[0] != self.pos.x:
-                self.angle = math.atan((event.pos[1] - self.pos.y) / (event.pos[0] - self.pos.x))
-            elif event.pos[0] == self.pos.x:
-                self.angle = -80 * (event.pos[1] - self.pos.y) / abs(event.pos[1] - self.pos.y)
+            if event.pos[0] != self.pos_render.x:
+                self.angle = math.atan((event.pos[1] - self.pos_render.y) / (event.pos[0] - self.pos_render.x))
+            elif event.pos[0] == self.pos_render.x:
+                self.angle = -80 * (event.pos[1] - self.pos_render.y) / abs(event.pos[1] - self.pos_render.y)
             self.angle = self.angle * 360 / 6.28
-            if event.pos[0] < self.pos.x:
+            if event.pos[0] < self.pos_render.x:
                 self.angle += 180
             self.rotate()
         self.shoot_delay += 1
@@ -127,7 +126,7 @@ class Player(pg.sprite.Sprite):
         # Rotate the offset vector.
         offset_rotated = self.offset.rotate(self.angle)
         # Create a new rect with the center of the sprite + the offset.
-        self.rect = self.image.get_rect(center=self.pos + offset_rotated)
+        self.rect = self.image.get_rect(center=self.pos_render + offset_rotated)
 
     def move(self, keys):
         x = 0
@@ -141,15 +140,23 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_d]:
             x += 1
         if (x ** 2 + y ** 2) > 0:
-            self.pos.x += self.speed * x / (x ** 2 + y ** 2) ** 0.5
-            self.pos.y += self.speed * y / (x ** 2 + y ** 2) ** 0.5
+            self.pos.x += int(self.speed * x / (x ** 2 + y ** 2) ** 0.5)
+            self.pos.y += int(self.speed * y / (x ** 2 + y ** 2) ** 0.5)
+        if self.pos.x >= 10000:
+            self.pos.x = 10000
+        if self.pos.y >= 10000:
+            self.pos.y = 10000
+        if self.pos.x <= 0:
+            self.pos.x = 0
+        if self.pos.y <= 0:
+            self.pos.y = 0
 
-    def shoot(self, all_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = Bullet(self)
                 bullets.append(bullet)
-                all_sprites.add(bullet)
+                bullet_sprites.add(bullet)
                 bullet.angle_update(pg.mouse.get_pos())
         except AttributeError:
             pass
@@ -171,6 +178,7 @@ class Player(pg.sprite.Sprite):
         if (self.XP >= score_func) and (self.level < 45):
             self.level += 1
             self.max_HP = 50 + 2 * (self.level - 1)
+            self.HP += 2
             if 2 <= self.level <= 28:
                 self.skill_points += 1
             elif (self.level >= 30) and (self.level % 3 == 0):
@@ -231,6 +239,19 @@ class Player(pg.sprite.Sprite):
             self.speed_points += 1
             self.skill_points -= 1
 
+    def render_food(self, arr_food, arr_food_to_render):
+        food_sprite_to_render = pg.sprite.Group()
+        for food in arr_food:
+            if (abs(food.pos.x - self.pos.x) <= 500) and (abs(food.pos.y - self.pos.y) <= 375):
+                food.pos_render = Vector2(food.pos.x - self.pos.x + 500, food.pos.y - self.pos.y + 375)
+                food_sprite_to_render.add(food)
+                if food not in arr_food_to_render:
+                    arr_food_to_render.append(food)
+            else:
+                if food in arr_food_to_render:
+                    arr_food_to_render.remove(food)
+        return food_sprite_to_render
+
 
 class Bullet(pg.sprite.Sprite):
     def __init__(self, player):
@@ -238,11 +259,13 @@ class Bullet(pg.sprite.Sprite):
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
         # A reference to the original image to preserve the quality.
-        self.orig_image = pg.image.load('Sprites/BulletM.png')
+        self.orig_image = pg.image.load('Sprites/bullet_m.png')
         self.size = self.orig_image.get_size()
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.20), int(self.size[1] * 0.20)))
         self.rect = self.orig_image.get_rect()
-        self.pos = Vector2(pos)  # The original center position/pivot point.
+        self.pos = Vector2(pos)
+        self.pos_render = Vector2(500, 375)
+        self.shift = Vector2(0, 0)
         self.len = player.len_gun
         self.offset = Vector2(self.len * math.cos(player.angle * 6.28 / 360),
                               self.len * math.sin(player.angle * 6.28 / 360))
@@ -253,9 +276,9 @@ class Bullet(pg.sprite.Sprite):
         self.penetration = player.bullet_penetration  # Не точно
         self.damage = player.bullet_damage  # 7 HP
 
-    def update(self, event):
+    def update(self, event, player):
         self.rotate()
-        self.move()
+        self.move(player)
         self.penetration -= 0.04
         self.damage -= 0.04
 
@@ -266,35 +289,31 @@ class Bullet(pg.sprite.Sprite):
         # Rotate the offset vector.
         offset_rotated = self.offset.rotate(0.01)
         # Create a new rect with the center of the sprite + the offset.
-        self.rect = self.image.get_rect(center=self.pos + offset_rotated)
+        self.rect = self.image.get_rect(center=self.pos_render + self.shift + offset_rotated)
 
     def angle_update(self, event):
-        if event[0] != self.pos.x:
-            self.angle = math.atan((event[1] - self.pos.y) / (event[0] - self.pos.x))
-        elif event[0] == self.pos.x:
-            self.angle = -80 * (event[1] - self.pos.y) / abs(event[1] - self.pos.y)
+        if event[0] != self.pos_render.x:
+            self.angle = math.atan((event[1] - self.pos_render.y) / (event[0] - self.pos_render.x))
+        elif event[0] == self.pos_render.x:
+            self.angle = -80 * (event[1] - self.pos_render.y) / abs(event[1] - self.pos_render.y)
         self.angle = self.angle * 360 / 6.28
-        if event[0] < self.pos.x:
+        if event[0] < self.pos_render.x:
             self.angle += 180
 
-    def move(self):
-        self.pos.x += self.speed * math.cos(self.angle * 6.28 / 360)
-        self.pos.y += self.speed * math.sin(self.angle * 6.28 / 360)
+    def move(self, player):
+        self.shift = self.pos - player.pos
+        self.pos_render.x += self.speed * math.cos(self.angle * 6.28 / 360)
+        self.pos_render.y += self.speed * math.sin(self.angle * 6.28 / 360)
 
-    def damage_food(self, food, bullets, arr_food, player):
+    def damage_food(self, food, bullets, arr_food, arr_food_to_render, player):
         # FIXME Ваня, хитбоксы у еды при контакте с пулей круглые, ты вроде хотел сделать их по спрайту,
         #  а при соударениях друг с другом круглыми
-        def inPolygon(x, y, tpx, tpy):
-            c=0
-            for i in range(len(tpx)):
-                if (((tpy[i]<=y and y<tpy[i-1]) or (tpy[i-1]<=y and y<tpy[i])) and (x > (tpx[i-1] - tpx[i]) * (y - tpy[i]) / (tpy[i-1] - tpy[i]) + tpx[i])): 
-                    c = 1 - c    
-            if c == 1: 
-                return True
-        if inPolygon(self.pos.x, self.pos.y, food.tpx, food.tpy):
+        if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 +\
+                (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
             food.death(arr_food, player)
+            food.death(arr_food_to_render, player)
         if self in bullets:
             self.death(bullets)
 
@@ -308,7 +327,7 @@ class Twin(Player):
     def __init__(self, player):
         super().__init__(player)
         self.pos = player.pos
-        self.orig_image = pg.image.load('Sprites/Twin.png')
+        self.orig_image = pg.image.load('Sprites/twin.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.offset = Vector2(9, 1)
         self.len_gun = 35
@@ -319,13 +338,15 @@ class Twin(Player):
         self.level = player.level
         self.XP = player.XP
         self.skill_points = player.skill_points
+        self.max_HP = player.max_HP
+        self.HP = player.HP
 
-    def shoot(self, all_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = TwinBullet(self)
                 bullets.append(bullet)
-                all_sprites.add(bullet)
+                bullet_sprites.add(bullet)
                 bullet.angle_update(pg.mouse.get_pos())
         except AttributeError:
             pass
@@ -359,7 +380,7 @@ class Sniper(Player):
     def __init__(self, player):
         super().__init__(player)
         self.pos = player.pos
-        self.orig_image = pg.image.load('Sprites/Sniper.png')
+        self.orig_image = pg.image.load('Sprites/sniper.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.4), int(self.size[1] * 0.36)))
         self.offset = Vector2(13, 1)
         self.len_gun = 35
@@ -370,6 +391,8 @@ class Sniper(Player):
         self.level = player.level
         self.XP = player.XP
         self.skill_points = player.skill_points
+        self.max_HP = player.max_HP
+        self.HP = player.HP
 
     def bullet_speed_up(self):
         if (self.bullet_speed_points < 7) and (self.skill_points > 0):
@@ -382,7 +405,7 @@ class MachineGun(Player):
     def __init__(self, player):
         super().__init__(player)
         self.pos = player.pos
-        self.orig_image = pg.image.load('Sprites/MachineGun.png')
+        self.orig_image = pg.image.load('Sprites/machine_gun.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.offset = Vector2(9, 1)
         self.len_gun = 35
@@ -393,13 +416,15 @@ class MachineGun(Player):
         self.level = player.level
         self.XP = player.XP
         self.skill_points = player.skill_points
+        self.max_HP = player.max_HP
+        self.HP = player.HP
 
-    def shoot(self, all_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = MachineGunBullet(self)
                 bullets.append(bullet)
-                all_sprites.add(bullet)
+                bullet_sprites.add(bullet)
                 bullet.angle_update(pg.mouse.get_pos())
         except AttributeError:
             pass
@@ -422,12 +447,12 @@ class MachineGunBullet(Bullet):
         super().__init__(player)
 
     def angle_update(self, event):
-        if event[0] != self.pos.x:
-            self.angle = math.atan((event[1] - self.pos.y) / (event[0] - self.pos.x))
-        elif event[0] == self.pos.x:
-            self.angle = -80 * (event[1] - self.pos.y) / abs(event[1] - self.pos.y)
+        if event[0] != self.pos_render.x:
+            self.angle = math.atan((event[1] - self.pos_render.y) / (event[0] - self.pos_render.x))
+        elif event[0] == self.pos_render.x:
+            self.angle = -80 * (event[1] - self.pos_render.y) / abs(event[1] - self.pos_render.y)
         self.angle = self.angle * 360 / 6.28
-        if event[0] < self.pos.x:
+        if event[0] < self.pos_render.x:
             self.angle += 180
         self.angle += randint(-20, 20)
 
@@ -436,7 +461,7 @@ class FlankGuard(Player):
     def __init__(self, player):
         super().__init__(player)
         self.pos = player.pos
-        self.orig_image = pg.image.load('Sprites/FlankGuard.png')
+        self.orig_image = pg.image.load('Sprites/flank_guard.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.44), int(self.size[1] * 0.36)))
         self.offset = Vector2(4, 1)
         self.len_gun = 35
@@ -444,18 +469,20 @@ class FlankGuard(Player):
         self.level = player.level
         self.XP = player.XP
         self.skill_points = player.skill_points
+        self.max_HP = player.max_HP
+        self.HP = player.HP
 
-    def shoot(self, all_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet_front = FlankGuardBulletFront(self)
                 bullets.append(bullet_front)
-                all_sprites.add(bullet_front)
+                bullet_sprites.add(bullet_front)
                 bullet_front.angle_update(pg.mouse.get_pos())
 
                 bullet_back = FlankGuardBulletBack(self)
                 bullets.append(bullet_back)
-                all_sprites.add(bullet_back)
+                bullet_sprites.add(bullet_back)
                 bullet_back.angle_update(pg.mouse.get_pos())
         except AttributeError:
             pass
@@ -474,16 +501,18 @@ class FlankGuardBulletBack(Bullet):
         self.offset = Vector2(self.len * -math.cos(player.angle * 6.28 / 360),
                               self.len * -math.sin(player.angle * 6.28 / 360))
 
-    def move(self):
+    def move(self, player):
+        self.shift = self.pos - player.pos
         self.pos.x += self.speed * -math.cos(self.angle * 6.28 / 360)
         self.pos.y += self.speed * -math.sin(self.angle * 6.28 / 360)
+        self.pos_render.x += self.speed * -math.cos(self.angle * 6.28 / 360)
+        self.pos_render.y += self.speed * -math.sin(self.angle * 6.28 / 360)
 
 
 class Food(pg.sprite.Sprite):
     def __init__(self, filename):
         super().__init__()
-        self.screen = pg.display.set_mode((1000, 750))
-        pos = (randint(50, 950), randint(50, 700))
+        pos = (randint(50, 9500), randint(50, 9500))
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
         # A reference to the original image to preserve the quality.
         self.orig_image = pg.image.load(filename)
@@ -491,9 +520,9 @@ class Food(pg.sprite.Sprite):
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.rect = self.orig_image.get_rect()
         self.pos = Vector2(pos)  # The original center position/pivot point.
+        self.pos_render = Vector2(0, 0)   # Vector2(0, 0) player.pos - self.pos
         self.offset = Vector2(0, 0)  # We shift the sprite 50 px to the right.
         self.angle = randint(-180, 180)
-        self.a = 30
 
         self.vx = randint(-10, 10) / 100
         self.vy = (0.0101 - self.vx ** 2) ** 0.5 * [-1, 1][randrange(2)]
@@ -501,10 +530,9 @@ class Food(pg.sprite.Sprite):
         self.XP = 10
 
     def update(self, event):
+        self.move()
         self.angle += 0.35
         self.rotate()
-        self.move()
-
 
     def rotate(self):
         """Rotate the image of the sprite around a pivot point."""
@@ -513,12 +541,15 @@ class Food(pg.sprite.Sprite):
         # Rotate the offset vector.
         offset_rotated = self.offset.rotate(self.angle)
         # Create a new rect with the center of the sprite + the offset.
-        self.rect = self.image.get_rect(center=self.pos + offset_rotated)
-
+        self.rect = self.image.get_rect(center=self.pos_render + offset_rotated)
 
     def move(self):
         self.pos.x += self.vx
         self.pos.y += self.vy
+        if self.pos.x >= 10000 or self.pos.x <= 0:
+            self.vx *= -1
+        if self.pos.y >= 10000 or self.pos.y <= 0:
+            self.vy *= -1
 
     def death(self, arr_food, player):
         if self.HP <= 0:
@@ -526,134 +557,55 @@ class Food(pg.sprite.Sprite):
             arr_food.remove(self)
             player.XP += self.XP
 
-    def hit(self, arr_food, player):
-        pass
-
 
 class Square(Food):
     def __init__(self):
-        filename = 'Sprites/Square.png'
+        filename = 'Sprites/square.png'
         super().__init__(filename)
         self.HP = 10
         self.BD = 8  # Body_damage 8 HP
         self.XP = 10  # Score
         self.r = 19
-        self.a = 26 + 10
-        self.tpx = []
-        self.tpy = []
-
-    def update(self, event):
-        self.angle += 0.35
-        self.rotate()
-        self.move()       
-        angle = self.angle * math.pi / 180 + 0.8
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle), 
-                    x + self.a * math.cos(angle + 1 * 2*math.pi/4),
-                    x + self.a * math.cos(angle + 2 * 2*math.pi/4),
-                    x + self.a * math.cos(angle + 3 * 2*math.pi/4)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/4),
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/4),
-                    y + self.a * math.sin(angle + 3 * 2*math.pi/4)
-                    ]
 
 
 class Triangle(Food):
     def __init__(self):
-        filename = 'Sprites/Triangle.png'
+        filename = 'Sprites/triangle.png'
         super().__init__(filename)
         self.HP = 30
         self.BD = 8  # Body_damage 8 HP
         self.XP = 25  # Score
         self.r = 22
-        self.a = 22 + 10
-        self.tpx = []
-        self.tpy = []
-        
-    def update(self, event):
-        self.angle += 0.35
-        self.rotate()
-        self.move()
-        angle = self.angle * math.pi / 180 + 0.5
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x +self.a * math.cos(angle),
-                    x +self.a * math.cos(angle + 1 * 2*math.pi/3),
-                    x +self.a * math.cos(angle + 2 * 2*math.pi/3)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle), 
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/3), 
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/3)
-                    ]
 
 
 class Pentagon(Food):
     def __init__(self):
-        filename = 'Sprites/Pentagon.png'
+        filename = 'Sprites/pentagon.png'
         super().__init__(filename)
         self.HP = 100
         self.BD = 12  # Body_damage
         self.XP = 130
         self.r = 33
-        self.a = 33 + 10
-        self.tpx = []
-        self.tpy = []
 
     def update(self, event):
+        self.move()
         self.angle += 0.15
         self.rotate()
-        self.move()
-        angle = self.angle * math.pi / 180 - 0.32
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 2 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 3 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 4 * 2*math.pi/5)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 3 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 4 * 2*math.pi/5)
-                    ]
 
 
 class AlphaPentagon(Food):
     def __init__(self):
-        filename = 'Sprites/AlphaPentagon.png'
+        filename = 'Sprites/alpha_pentagon.png'
         super().__init__(filename)
         self.HP = 3000
         self.BD = 20  # Body_damage
         self.XP = 3000
         self.r = 85
-        self.a = 85 + 10
-        self.tpx = []
-        self.tpy = []
 
     def update(self, event):
+        self.move()
         self.angle += 0.10
         self.rotate()
-        self.move()       
-        angle = self.angle * math.pi / 180 - 0.32
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 2 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 3 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 4 * 2*math.pi/5)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 3 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 4 * 2*math.pi/5)
-                    ]
 
 
 class Generator:
@@ -675,24 +627,21 @@ class Generator:
             player_sprites = pg.sprite.Group(player)
         return player, player_sprites
 
-    def generate_food(self, all_sprites, arr_food):
-        n_max = 12
+    def generate_food(self, arr_food):
+        n_max = 1000
         variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]
         for i in range(n_max):
             food = choice(variants)
             if food == 0:
                 sq = Square()
                 arr_food.append(sq)
-                all_sprites.add(sq)
             elif food == 1:
                 tr = Triangle()
                 arr_food.append(tr)
-                all_sprites.add(tr)
             else:
                 pn = Pentagon()
                 arr_food.append(pn)
-                all_sprites.add(pn)
-        return all_sprites, arr_food
+        return arr_food
 
 
 if __name__ == "__main__":
