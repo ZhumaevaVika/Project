@@ -4,7 +4,6 @@ import math
 from random import randint, randrange, choice
 
 
-
 class Player(pg.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
@@ -30,8 +29,6 @@ class Player(pg.sprite.Sprite):
         self.bullet_damage = 7
         self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
         self.speed = 3.5  # С увеличением уровня падает скорость
-        self.m = 50
-        self.impulse = 200
 
         self.regen_points = 0
         self.max_HP_points = 0
@@ -41,6 +38,9 @@ class Player(pg.sprite.Sprite):
         self.bullet_damage_points = 0
         self.reload_points = 0
         self.speed_points = 0
+
+        self.m = 50
+        self.impulse = 200
 
         if player is None:
             self.level = 1
@@ -63,6 +63,7 @@ class Player(pg.sprite.Sprite):
                     c = 1 - c
             if c == 1:
                 return True
+
         for food in arr_food_to_render:
             if in_polygon(self.pos.x, self.pos.y, food.tpx, food.tpy):
                 self.HP -= int(min(self.BD, food.HP))
@@ -180,11 +181,11 @@ class Player(pg.sprite.Sprite):
             pass
 
     def get_shoot_delay(self, event, time_click_passed, mouse_up):
-        if event.type == pg.MOUSEBUTTONUP:
+        if event.type == pg.MOUSEBUTTONUP and (event.button == 1):
             self.shoot_delay = 0
             mouse_up = 1
 
-        elif event.type == pg.MOUSEBUTTONDOWN:
+        elif (event.type == pg.MOUSEBUTTONDOWN) and (event.button == 1):
             if time_click_passed > self.reload:
                 self.shoot_delay = 0
                 time_click_passed = 0
@@ -197,7 +198,7 @@ class Player(pg.sprite.Sprite):
             self.level += 1
             self.max_HP = 50 + 2 * (self.level - 1)
             self.HP += 2
-            self.m += 5
+            self.m += 1.5
             self.speed = self.impulse / self.m
             if 2 <= self.level <= 28:
                 self.skill_points += 1
@@ -207,7 +208,7 @@ class Player(pg.sprite.Sprite):
 
     def health_regen_up(self):
         if (self.regen_points < 7) and (self.skill_points > 0):
-            regen_func = -0.0332 * self.regen_points ** 3 + 0.5029 * self.regen_points ** 2\
+            regen_func = -0.0332 * self.regen_points ** 3 + 0.5029 * self.regen_points ** 2 \
                          - 0.1154 * self.regen_points + 3.12
             self.regen = int(regen_func * 100) // 100
             self.regen_points += 1
@@ -326,7 +327,7 @@ class Bullet(pg.sprite.Sprite):
         self.pos_render.y += self.speed * math.sin(self.angle * 6.28 / 360)
 
     def damage_food(self, food, bullets, arr_food, arr_food_to_render, player):
-        if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 +\
+        if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 + \
                 (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
@@ -393,6 +394,21 @@ class TwinBullet(Bullet):
             self.len * math.sin(player.angle * 6.28 / 360) - 12 * math.cos(player.angle * 6.28 / 360))
         self.offset = choice([self.offset1, self.offset2])
 
+        self.level = player.level
+        self.XP = player.XP
+        self.skill_points = player.skill_points
+        self.max_HP = player.max_HP
+        self.HP = player.HP
+
+        self.regen_points = player.regen_points
+        self.max_HP_points = player.max_HP_points
+        self.BD_points = player.BD_points
+        self.bullet_speed_points = player.bullet_speed_points
+        self.bullet_penetration_points = player.bullet_penetration_points
+        self.bullet_damage_points = player.bullet_damage_points
+        self.reload_points = player.reload_points
+        self.speed_points = player.speed_points
+
 
 class Sniper(Player):
     def __init__(self, player):
@@ -411,6 +427,15 @@ class Sniper(Player):
         self.skill_points = player.skill_points
         self.max_HP = player.max_HP
         self.HP = player.HP
+
+        self.regen_points = player.regen_points
+        self.max_HP_points = player.max_HP_points
+        self.BD_points = player.BD_points
+        self.bullet_speed_points = player.bullet_speed_points
+        self.bullet_penetration_points = player.bullet_penetration_points
+        self.bullet_damage_points = player.bullet_damage_points
+        self.reload_points = player.reload_points
+        self.speed_points = player.speed_points
 
     def bullet_speed_up(self):
         if (self.bullet_speed_points < 7) and (self.skill_points > 0):
@@ -436,6 +461,15 @@ class MachineGun(Player):
         self.skill_points = player.skill_points
         self.max_HP = player.max_HP
         self.HP = player.HP
+
+        self.regen_points = player.regen_points
+        self.max_HP_points = player.max_HP_points
+        self.BD_points = player.BD_points
+        self.bullet_speed_points = player.bullet_speed_points
+        self.bullet_penetration_points = player.bullet_penetration_points
+        self.bullet_damage_points = player.bullet_damage_points
+        self.reload_points = player.reload_points
+        self.speed_points = player.speed_points
 
     def shoot(self, bullet_sprites, bullets):
         try:
@@ -490,6 +524,15 @@ class FlankGuard(Player):
         self.max_HP = player.max_HP
         self.HP = player.HP
 
+        self.regen_points = player.regen_points
+        self.max_HP_points = player.max_HP_points
+        self.BD_points = player.BD_points
+        self.bullet_speed_points = player.bullet_speed_points
+        self.bullet_penetration_points = player.bullet_penetration_points
+        self.bullet_damage_points = player.bullet_damage_points
+        self.reload_points = player.reload_points
+        self.speed_points = player.speed_points
+
     def shoot(self, bullet_sprites, bullets):
         try:
             if self.shoot_delay % self.reload == 0:
@@ -521,8 +564,6 @@ class FlankGuardBulletBack(Bullet):
 
     def move(self, player):
         self.shift = self.pos - player.pos
-        self.pos.x += self.speed * -math.cos(self.angle * 6.28 / 360)
-        self.pos.y += self.speed * -math.sin(self.angle * 6.28 / 360)
         self.pos_render.x += self.speed * -math.cos(self.angle * 6.28 / 360)
         self.pos_render.y += self.speed * -math.sin(self.angle * 6.28 / 360)
 
@@ -538,7 +579,7 @@ class Food(pg.sprite.Sprite):
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.rect = self.orig_image.get_rect()
         self.pos = Vector2(pos)  # The original center position/pivot point.
-        self.pos_render = Vector2(0, 0)   # Vector2(0, 0) player.pos - self.pos
+        self.pos_render = Vector2(0, 0)  # Vector2(0, 0) player.pos - self.pos
         self.offset = Vector2(0, 0)  # We shift the sprite 50 px to the right.
         self.angle = randint(-180, 180)
         self.a = 30
@@ -575,6 +616,8 @@ class Food(pg.sprite.Sprite):
             self.kill()
             arr_food.remove(self)
             player.XP += self.XP
+            generator = Generator()
+            generator.generate_food(arr_food, 1)
 
 
 class Square(Food):
@@ -592,19 +635,19 @@ class Square(Food):
     def update(self, event):
         self.angle += 0.35
         self.rotate()
-        self.move()       
+        self.move()
         angle = self.angle * math.pi / 180 + 0.8
         x = self.pos.x
         y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle), 
-                    x + self.a * math.cos(angle + 1 * 2*math.pi/4),
-                    x + self.a * math.cos(angle + 2 * 2*math.pi/4),
-                    x + self.a * math.cos(angle + 3 * 2*math.pi/4)
+        self.tpx = [x + self.a * math.cos(angle),
+                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 4),
+                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 4),
+                    x + self.a * math.cos(angle + 3 * 2 * math.pi / 4)
                     ]
         self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/4),
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/4),
-                    y + self.a * math.sin(angle + 3 * 2*math.pi/4)
+                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 4),
+                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 4),
+                    y + self.a * math.sin(angle + 3 * 2 * math.pi / 4)
                     ]
 
 
@@ -619,7 +662,7 @@ class Triangle(Food):
         self.a = 22 + 10
         self.tpx = []
         self.tpy = []
-        
+
     def update(self, event):
         self.angle += 0.35
         self.rotate()
@@ -628,12 +671,12 @@ class Triangle(Food):
         x = self.pos.x
         y = self.pos.y
         self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2*math.pi/3),
-                    x + self.a * math.cos(angle + 2 * 2*math.pi/3)
+                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 3),
+                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 3)
                     ]
-        self.tpy = [y + self.a * math.sin(angle), 
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/3), 
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/3)
+        self.tpy = [y + self.a * math.sin(angle),
+                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 3),
+                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 3)
                     ]
 
 
@@ -657,16 +700,16 @@ class Pentagon(Food):
         x = self.pos.x
         y = self.pos.y
         self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 2 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 3 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 4 * 2*math.pi/5)
+                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 5),
+                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 5),
+                    x + self.a * math.cos(angle + 3 * 2 * math.pi / 5),
+                    x + self.a * math.cos(angle + 4 * 2 * math.pi / 5)
                     ]
         self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 3 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 4 * 2*math.pi/5)
+                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 5),
+                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 5),
+                    y + self.a * math.sin(angle + 3 * 2 * math.pi / 5),
+                    y + self.a * math.sin(angle + 4 * 2 * math.pi / 5)
                     ]
 
 
@@ -690,16 +733,16 @@ class AlphaPentagon(Food):
         x = self.pos.x
         y = self.pos.y
         self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 2 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 3 * 2*math.pi/5),
-                    x + self.a * math.cos(angle + 4 * 2*math.pi/5)
+                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 5),
+                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 5),
+                    x + self.a * math.cos(angle + 3 * 2 * math.pi / 5),
+                    x + self.a * math.cos(angle + 4 * 2 * math.pi / 5)
                     ]
         self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 2 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 3 * 2*math.pi/5),
-                    y + self.a * math.sin(angle + 4 * 2*math.pi/5)
+                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 5),
+                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 5),
+                    y + self.a * math.sin(angle + 3 * 2 * math.pi / 5),
+                    y + self.a * math.sin(angle + 4 * 2 * math.pi / 5)
                     ]
 
 
@@ -722,8 +765,7 @@ class Generator:
             player_sprites = pg.sprite.Group(player)
         return player, player_sprites
 
-    def generate_food(self, arr_food):
-        n_max = 1000
+    def generate_food(self, arr_food, n_max):
         variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]
         for i in range(n_max):
             food = choice(variants)
