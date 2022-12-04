@@ -1,7 +1,8 @@
 import pygame as pg
 
 from Objects import Generator
-from Visuals import draw_bottom_interface  # подключил функцию из нового файлика (коммит с health bar)
+from Visuals import draw_bottom_interface
+from config import FPS, HEIGHT, WIDTH, WHITE
 
 # TODO Сделать столкновения объектов (Ваня)
 # TODO Добавить регенерацию (Вика)
@@ -15,21 +16,6 @@ from Visuals import draw_bottom_interface  # подключил функцию �
 # FIXME Сделать, чтобы Twin по очереди стрелял из пушек (395 строка в Objects) (Ваня)
 # FIXME При смене класса сбрасывается прокачка, skill points остаются (Вика)
 # FIXME Если набрать много очков, при отрисовке зеленая линия выходит за границы (Максим)
-
-FPS = 60
-WIDTH = 1000
-HEIGHT = 750
-
-RED = 0xFF0000
-BLUE = 0x0000FF
-YELLOW = 0xFFC91F
-GREEN = 0x00FF00
-MAGENTA = 0xFF03B8
-CYAN = 0x00FFCC
-BLACK = (0, 0, 0)
-WHITE = 0xFFFFFF
-GREY = 0x7D7D7D
-GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 
 def main():

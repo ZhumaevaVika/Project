@@ -20,6 +20,8 @@ class Player(pg.sprite.Sprite):
         self.len_gun = 35
         self.shoot_delay = 0
 
+        self.class_type = 'Tank'
+
         self.regen = 3.12  # 3.12% per second
         self.max_HP = 50
         self.HP = 50
@@ -350,6 +352,7 @@ class Twin(Player):
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.offset = Vector2(9, 1)
         self.len_gun = 35
+        self.class_type = 'Twin'
 
         self.reload = 18
         self.bullet_damage = 6
@@ -419,6 +422,8 @@ class Sniper(Player):
         self.offset = Vector2(13, 1)
         self.len_gun = 35
 
+        self.class_type = 'Sniper'
+
         self.bullet_speed = 6
         self.reload = 48
 
@@ -452,6 +457,8 @@ class MachineGun(Player):
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.offset = Vector2(9, 1)
         self.len_gun = 35
+
+        self.class_type = 'MachineGun'
 
         self.reload = 18
         self.bullet_damage = 6.5
@@ -517,6 +524,8 @@ class FlankGuard(Player):
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.44), int(self.size[1] * 0.36)))
         self.offset = Vector2(4, 1)
         self.len_gun = 35
+
+        self.class_type = 'FlankGuard'
 
         self.level = player.level
         self.XP = player.XP
