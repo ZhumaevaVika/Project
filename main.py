@@ -1,6 +1,6 @@
 import pygame as pg
 
-from Objects import Generator
+from Objects import Generator, food_hit
 from Visuals import draw_bottom_interface
 from config import FPS, HEIGHT, WIDTH, WHITE
 
@@ -59,12 +59,13 @@ def main():
                     bul.damage_food(food, bullets, arr_food, arr_food_to_render, player)
 
         player.hit_food(arr_food, arr_food_to_render)
+        food_hit(arr_food_to_render)
         player_sprites.update(event_mouse)
         food_sprite_to_render = player.render_food(arr_food, arr_food_to_render)
-        food_sprite_to_render.update(event_mouse)
+        food_sprite_to_render.update()
         bullet_sprites.update(event_mouse, player)
         screen.fill(WHITE)
-
+        
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)

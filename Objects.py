@@ -3,6 +3,41 @@ from pygame.math import Vector2
 import math
 from random import randint, randrange, choice
 
+def in_polygon(x, y, tpx, tpy):
+    c = 0
+    for i in range(len(tpx)):
+        if ((tpy[i] <= y < tpy[i - 1]) or (tpy[i - 1] <= y < tpy[i])) \
+                and (x > (tpx[i - 1] - tpx[i]) * (y - tpy[i]) / (tpy[i - 1] - tpy[i]) + tpx[i]):
+            c = 1 - c
+    if c == 1:
+        return True
+
+def food_hit(arr_food):
+    for i in range(len(arr_food) - 1):
+        for j in range(i + 1, len(arr_food)):
+            f1 = arr_food[i]
+            x1 = f1.pos.x
+            y1 = f1.pos.y
+            r1 = f1.r
+            m1 = f1.m
+            f2 = arr_food[j]
+            if ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) <= (f1.r + f2.r) ** 2:
+                xc = (f1.pos.x * f1.m + f2.pos.x * f2.m) / (f1.m + f2.m)
+                yc = (f1.pos.y * f2.m + f2.pos.y * f2.m) / (f1.m + f2.m)
+                k = (f1.r + f2.r) / ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) ** 0.5
+                f1.pos.x = xc + (f1.pos.x - xc) * k
+                f1.pos.y = yc + (f1.pos.y - yc) * k
+                f2.pos.x = xc + (f2.pos.x - xc) * k
+                f2.pos.y = yc + (f2.pos.y - yc) * k
+                X = f2.pos.x - f1.pos.x
+                Y = f2.pos.y - f1.pos.y
+                P = (2 / (f1.m + f2.m)) * ((f2.vx - f1.vx) * X + (f2.vy - f1.vy) * Y) / (X**2 + Y**2)
+                f1.vx += P * f2.m * X
+                f1.vy += P * f2.m * Y
+                f2.vx -= P * f1.m * X
+                f2.vy -= P * f1.m * Y
+
+
 
 class Player(pg.sprite.Sprite):
     def __init__(self, player):
@@ -43,6 +78,7 @@ class Player(pg.sprite.Sprite):
 
         self.m = 50
         self.impulse = 200
+        self.r = 32
 
         if player is None:
             self.level = 1
@@ -57,17 +93,8 @@ class Player(pg.sprite.Sprite):
             self.HP = player.HP
 
     def hit_food(self, arr_food, arr_food_to_render):
-        def in_polygon(x, y, tpx, tpy):
-            c = 0
-            for i in range(len(tpx)):
-                if ((tpy[i] <= y < tpy[i - 1]) or (tpy[i - 1] <= y < tpy[i])) \
-                        and (x > (tpx[i - 1] - tpx[i]) * (y - tpy[i]) / (tpy[i - 1] - tpy[i]) + tpx[i]):
-                    c = 1 - c
-            if c == 1:
-                return True
-
         for food in arr_food_to_render:
-            if in_polygon(self.pos.x, self.pos.y, food.tpx, food.tpy):
+            if in_polygon(self.pos.x, self.pos.y, food.generate_hitbox(self.r)[0], food.generate_hitbox(self.r)[1]):
                 self.HP -= int(min(self.BD, food.HP))
                 food.HP -= min(self.BD, food.HP)
                 food.death(arr_food_to_render, self)
@@ -140,6 +167,7 @@ class Player(pg.sprite.Sprite):
 
         self.level_up()
 
+
     def rotate(self):
         """Rotate the image of the sprite around a pivot point."""
         # Rotate the image.
@@ -160,9 +188,10 @@ class Player(pg.sprite.Sprite):
             y += 1
         if keys[pg.K_d]:
             x += 1
-        if (x ** 2 + y ** 2) > 0:
-            self.pos.x += int(self.speed * x / (x ** 2 + y ** 2) ** 0.5)
-            self.pos.y += int(self.speed * y / (x ** 2 + y ** 2) ** 0.5)
+        A = (x ** 2 + y ** 2) ** 0.5
+        if A > 0:
+            self.pos.x += int(self.speed * x / A)
+            self.pos.y += int(self.speed * y / A)
         if self.pos.x >= 10000:
             self.pos.x = 10000
         if self.pos.y >= 10000:
@@ -342,7 +371,7 @@ class Bullet(pg.sprite.Sprite):
         if self.penetration <= 0:
             self.kill()
             bullets.remove(self)
-
+            
 
 class Twin(Player):
     def __init__(self, player):
@@ -592,16 +621,20 @@ class Food(pg.sprite.Sprite):
         self.offset = Vector2(0, 0)  # We shift the sprite 50 px to the right.
         self.angle = randint(-180, 180)
         self.a = 30
-
+        self.n = 3  # число вершин хитбокса
+        self.delta = 0  # сдвиг по углу хитбокса
+        self.rotate_speed = 0.35 # скорость вращения спрайта 
         self.vx = randint(-10, 10) / 100
         self.vy = (0.0101 - self.vx ** 2) ** 0.5 * [-1, 1][randrange(2)]
         self.HP = 10
         self.XP = 10
+        self.m = 10
 
-    def update(self, event):
+    def update(self):
         self.move()
-        self.angle += 0.35
+        self.angle += self.rotate_speed
         self.rotate()
+        self.generate_hitbox()
 
     def rotate(self):
         """Rotate the image of the sprite around a pivot point."""
@@ -628,6 +661,17 @@ class Food(pg.sprite.Sprite):
             generator = Generator()
             generator.generate_food(arr_food, 1)
 
+    def generate_hitbox(self, r = 0):
+        angle = self.angle * math.pi / 180 + self.delta
+        x = self.pos.x
+        y = self.pos.y
+        n = self.n
+        a = self.a + r
+        for i in range(n):
+            self.tpx[i] = x + a * math.cos(angle + i * 2 * math.pi / n) 
+            self.tpy[i] = y + a * math.sin(angle + i * 2 * math.pi / n)
+        return self.tpx, self.tpy
+
 
 class Square(Food):
     def __init__(self):
@@ -637,27 +681,13 @@ class Square(Food):
         self.BD = 8  # Body_damage 8 HP
         self.XP = 10  # Score
         self.r = 19
-        self.a = 26 + 10
-        self.tpx = []
-        self.tpy = []
-
-    def update(self, event):
-        self.angle += 0.35
-        self.rotate()
-        self.move()
-        angle = self.angle * math.pi / 180 + 0.8
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 4),
-                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 4),
-                    x + self.a * math.cos(angle + 3 * 2 * math.pi / 4)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 4),
-                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 4),
-                    y + self.a * math.sin(angle + 3 * 2 * math.pi / 4)
-                    ]
+        self.a = 26
+        self.n = 4
+        self.delta = 0.8
+        self.tpx = [0, 0, 0, 0]
+        self.tpy = [0, 0, 0, 0]
+        self.rotate_speed = 0.35
+        self.m = 10
 
 
 class Triangle(Food):
@@ -667,26 +697,14 @@ class Triangle(Food):
         self.HP = 30
         self.BD = 8  # Body_damage 8 HP
         self.XP = 25  # Score
-        self.r = 22
-        self.a = 22 + 10
-        self.tpx = []
-        self.tpy = []
-
-    def update(self, event):
-        self.angle += 0.35
-        self.rotate()
-        self.move()
-        angle = self.angle * math.pi / 180 + 0.5
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 3),
-                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 3)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 3),
-                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 3)
-                    ]
+        self.r = 15
+        self.a = 22
+        self.n = 3
+        self.delta = 0.5
+        self.tpx = [0, 0, 0]
+        self.tpy = [0, 0, 0]
+        self.rotate_speed = 0.35
+        self.m = 15
 
 
 class Pentagon(Food):
@@ -696,30 +714,14 @@ class Pentagon(Food):
         self.HP = 100
         self.BD = 12  # Body_damage
         self.XP = 130
-        self.r = 33
-        self.a = 33 + 10
-        self.tpx = []
-        self.tpy = []
-
-    def update(self, event):
-        self.move()
-        self.angle += 0.15
-        self.rotate()
-        angle = self.angle * math.pi / 180 - 0.32
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 5),
-                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 5),
-                    x + self.a * math.cos(angle + 3 * 2 * math.pi / 5),
-                    x + self.a * math.cos(angle + 4 * 2 * math.pi / 5)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 5),
-                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 5),
-                    y + self.a * math.sin(angle + 3 * 2 * math.pi / 5),
-                    y + self.a * math.sin(angle + 4 * 2 * math.pi / 5)
-                    ]
+        self.r = 27
+        self.a = 33
+        self.n = 5
+        self.delta = -0.32
+        self.tpx = [0, 0, 0, 0, 0]
+        self.tpy = [0, 0, 0, 0, 0]
+        self.rotate_speed = 0.15
+        self.m = 30
 
 
 class AlphaPentagon(Food):
@@ -729,30 +731,14 @@ class AlphaPentagon(Food):
         self.HP = 3000
         self.BD = 20  # Body_damage
         self.XP = 3000
-        self.r = 85
-        self.a = 85 + 10
-        self.tpx = []
-        self.tpy = []
-
-    def update(self, event):
-        self.move()
-        self.angle += 0.10
-        self.rotate()
-        angle = self.angle * math.pi / 180 - 0.32
-        x = self.pos.x
-        y = self.pos.y
-        self.tpx = [x + self.a * math.cos(angle),
-                    x + self.a * math.cos(angle + 1 * 2 * math.pi / 5),
-                    x + self.a * math.cos(angle + 2 * 2 * math.pi / 5),
-                    x + self.a * math.cos(angle + 3 * 2 * math.pi / 5),
-                    x + self.a * math.cos(angle + 4 * 2 * math.pi / 5)
-                    ]
-        self.tpy = [y + self.a * math.sin(angle),
-                    y + self.a * math.sin(angle + 1 * 2 * math.pi / 5),
-                    y + self.a * math.sin(angle + 2 * 2 * math.pi / 5),
-                    y + self.a * math.sin(angle + 3 * 2 * math.pi / 5),
-                    y + self.a * math.sin(angle + 4 * 2 * math.pi / 5)
-                    ]
+        self.r = 69
+        self.a = 85
+        self.n = 5
+        self.delta = -0.32
+        self.tpx = [0, 0, 0, 0, 0]
+        self.tpy = [0, 0, 0, 0, 0]
+        self.rotate_speed = 0.10
+        self.m = 100
 
 
 class Generator:
