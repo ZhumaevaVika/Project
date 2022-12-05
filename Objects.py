@@ -54,6 +54,7 @@ class Player(pg.sprite.Sprite):
         self.angle = 0
         self.len_gun = 35
         self.shoot_delay = 0
+        self.regen_time = 0
 
         self.class_type = 'Tank'
 
@@ -96,6 +97,7 @@ class Player(pg.sprite.Sprite):
         for food in arr_food_to_render:
             if in_polygon(self.pos.x, self.pos.y, food.generate_hitbox(self.r)[0], food.generate_hitbox(self.r)[1]):
                 self.HP -= int(min(self.BD, food.HP))
+                self.regen_time = 0
                 food.HP -= min(self.BD, food.HP)
                 food.death(arr_food_to_render, self)
                 food.death(arr_food, self)
@@ -166,6 +168,7 @@ class Player(pg.sprite.Sprite):
         self.shoot_delay += 1
 
         self.level_up()
+        self.regenerate()
 
 
     def rotate(self):
@@ -290,6 +293,14 @@ class Player(pg.sprite.Sprite):
             self.impulse += 50
             self.speed_points += 1
             self.skill_points -= 1
+
+    def regenerate(self):
+        if self.HP < self.max_HP:
+            self.regen_time += 1
+        else:
+            self.regen_time = 0
+        if self.regen_time > 6000/self.regen:
+            self.HP += 1
 
     def render_food(self, arr_food, arr_food_to_render):
         food_sprite_to_render = pg.sprite.Group()
