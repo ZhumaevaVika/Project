@@ -4,12 +4,10 @@ from Objects import Generator, food_hit
 from Visuals import draw_bottom_interface
 from config import FPS, HEIGHT, WIDTH, WHITE
 
-# TODO Сделать столкновения объектов (Ваня)
-# TODO Добавить регенерацию (Вика)
 # TODO Графический интерфейс (Максим)
 # TODO Отрисовывать границы карты, потому что не понятно где она кончается (Максим)
 # TODO Добавить ботов (для начала с простым интеллектом,
-#  по типу рандомный спавн со случайным уровнем и прокачкой, едут за игроком и стреляют в него)
+#  по типу рандомный спавн со случайным уровнем и прокачкой, едут за игроком и стреляют в него) (Вика)
 
 # FIXME Танк слишком медленный, надо подобрать значения массы и скорости. При движении по диагонали скорость
 #  маленькая (Ваня)
@@ -26,7 +24,6 @@ def main():
     generator = Generator()
     player = None
     player, player_sprites = generator.generate_player('Player', player)
-    # player_sprites.add(Player())
     bullet_sprites = pg.sprite.Group()
     arr_food = generator.generate_food(arr_food, 1000)
 
@@ -65,7 +62,7 @@ def main():
         food_sprite_to_render.update()
         bullet_sprites.update(event_mouse, player)
         screen.fill(WHITE)
-        
+
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)

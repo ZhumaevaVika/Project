@@ -3,6 +3,7 @@ from pygame.math import Vector2
 import math
 from random import randint, randrange, choice
 
+
 def in_polygon(x, y, tpx, tpy):
     c = 0
     for i in range(len(tpx)):
@@ -12,15 +13,12 @@ def in_polygon(x, y, tpx, tpy):
     if c == 1:
         return True
 
-def food_hit(arr_food):
-    for i in range(len(arr_food) - 1):
-        for j in range(i + 1, len(arr_food)):
-            f1 = arr_food[i]
-            x1 = f1.pos.x
-            y1 = f1.pos.y
-            r1 = f1.r
-            m1 = f1.m
-            f2 = arr_food[j]
+
+def food_hit(arr_food_to_render):
+    for i in range(len(arr_food_to_render) - 1):
+        for j in range(i + 1, len(arr_food_to_render)):
+            f1 = arr_food_to_render[i]
+            f2 = arr_food_to_render[j]
             if ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) <= (f1.r + f2.r) ** 2:
                 xc = (f1.pos.x * f1.m + f2.pos.x * f2.m) / (f1.m + f2.m)
                 yc = (f1.pos.y * f2.m + f2.pos.y * f2.m) / (f1.m + f2.m)
@@ -29,14 +27,15 @@ def food_hit(arr_food):
                 f1.pos.y = yc + (f1.pos.y - yc) * k
                 f2.pos.x = xc + (f2.pos.x - xc) * k
                 f2.pos.y = yc + (f2.pos.y - yc) * k
-                X = f2.pos.x - f1.pos.x
-                Y = f2.pos.y - f1.pos.y
-                P = (2 / (f1.m + f2.m)) * ((f2.vx - f1.vx) * X + (f2.vy - f1.vy) * Y) / (X**2 + Y**2)
-                f1.vx += P * f2.m * X
-                f1.vy += P * f2.m * Y
-                f2.vx -= P * f1.m * X
-                f2.vy -= P * f1.m * Y
-
+                x = f2.pos.x - f1.pos.x
+                y = f2.pos.y - f1.pos.y
+                p = (2 / (f1.m + f2.m)) * ((f2.vx - f1.vx) * x + (f2.vy - f1.vy) * y) / (x**2 + y**2)
+                f1.vx += p * f2.m * x
+                f1.vy += p * f2.m * y
+                f2.vx -= p * f1.m * x
+                f2.vy -= p * f1.m * y
+                f1.HP -= min(f1.HP, (f1.BD+f2.BD-4)//2) - 1
+                f2.HP -= min(f2.HP, (f1.BD+f2.BD-4)//2) - 1
 
 
 class Player(pg.sprite.Sprite):
@@ -170,7 +169,6 @@ class Player(pg.sprite.Sprite):
         self.level_up()
         self.regenerate()
 
-
     def rotate(self):
         """Rotate the image of the sprite around a pivot point."""
         # Rotate the image.
@@ -191,10 +189,10 @@ class Player(pg.sprite.Sprite):
             y += 1
         if keys[pg.K_d]:
             x += 1
-        A = (x ** 2 + y ** 2) ** 0.5
-        if A > 0:
-            self.pos.x += int(self.speed * x / A)
-            self.pos.y += int(self.speed * y / A)
+        a = (x ** 2 + y ** 2) ** 0.5
+        if a > 0:
+            self.pos.x += int(self.speed * x / a)
+            self.pos.y += int(self.speed * y / a)
         if self.pos.x >= 10000:
             self.pos.x = 10000
         if self.pos.y >= 10000:
@@ -305,7 +303,7 @@ class Player(pg.sprite.Sprite):
     def render_food(self, arr_food, arr_food_to_render):
         food_sprite_to_render = pg.sprite.Group()
         for food in arr_food:
-            if (abs(food.pos.x - self.pos.x) <= 500) and (abs(food.pos.y - self.pos.y) <= 375):
+            if (abs(food.pos.x - self.pos.x) <= 550) and (abs(food.pos.y - self.pos.y) <= 425):
                 food.pos_render = Vector2(food.pos.x - self.pos.x + 500, food.pos.y - self.pos.y + 375)
                 food_sprite_to_render.add(food)
                 if food not in arr_food_to_render:
@@ -634,7 +632,7 @@ class Food(pg.sprite.Sprite):
         self.a = 30
         self.n = 3  # число вершин хитбокса
         self.delta = 0  # сдвиг по углу хитбокса
-        self.rotate_speed = 0.35 # скорость вращения спрайта 
+        self.rotate_speed = 0.35  # скорость вращения спрайта
         self.vx = randint(-10, 10) / 100
         self.vy = (0.0101 - self.vx ** 2) ** 0.5 * [-1, 1][randrange(2)]
         self.HP = 10
@@ -667,7 +665,8 @@ class Food(pg.sprite.Sprite):
     def death(self, arr_food, player):
         if self.HP <= 0:
             self.kill()
-            arr_food.remove(self)
+            if self in arr_food:
+                arr_food.remove(self)
             player.XP += self.XP
             generator = Generator()
             generator.generate_food(arr_food, 1)
