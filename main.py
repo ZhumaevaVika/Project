@@ -66,7 +66,7 @@ def main():
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)
-        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000)  # вот что добавлено (коммит с health bar)
+        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000)
         pg.display.flip()
         clock.tick(FPS)
 
