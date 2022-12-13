@@ -153,7 +153,7 @@ def draw_upgrade_bar(screen, pos, width, height, color, value, max_value, text, 
     pygame.draw.circle(screen, color, (pos.x + width // 2, pos.y + 1), (height - 2) // 2)
     if value != 0:
         pygame.draw.line(screen, color, (pos.x - width // 2, pos.y),
-                        (pos.x - width // 2 + value_to_px, pos.y), height - 2)
+                                (pos.x - width // 2 + value_to_px, pos.y), height - 2)
         pygame.draw.circle(screen, color, (pos.x - width // 2, pos.y + 1), (height - 2) // 2)
     # pygame.draw.circle(screen, color, (pos.x - width // 2 + value_to_px, pos.y + 1), (height - 2) // 2)
     for i in range(max_value):
@@ -250,7 +250,7 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
 def draw_health_bars_for_food(screen, arr_food_to_render):
     for food in arr_food_to_render:
         if (food.HP >= 0) and (food.HP != food.max_HP):
-            draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 30), 50, 8, ANOTHER_GREEN, food.HP,
+            draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 40), 50, 8, ANOTHER_GREEN, food.HP,
                      food.max_HP)
 
 
@@ -271,7 +271,13 @@ def draw_background(width, height, screen, start_point, pos):
     elif pos.y <= height//2:
         pygame.draw.rect(screen, GREY, pygame.Rect(0, 0, width, height // 2 - pos.y))
 
-# def draw_choose_class_menu(width, height, screen, player):
-    #if player.level == 15:
 
+def draw_die_screen(screen, score, level):
+    text1 = 'Score: ' + str(score)
+    text2 = 'Level: ' + str(level)
+
+    draw_text(screen, Vector2(500, 230), 32, 'You were killed')
+    draw_text(screen, Vector2(500, 280), 32, text1)
+    draw_text(screen, Vector2(500, 315), 32, text2)
+    draw_text(screen, Vector2(500, 365), 32, 'Press enter to continue')
 

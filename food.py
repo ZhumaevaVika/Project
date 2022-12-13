@@ -15,7 +15,7 @@ class Food(pg.sprite.Sprite):
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.rect = self.orig_image.get_rect()
         self.pos = Vector2(pos)  # The original center position/pivot point.
-        self.pos_render = Vector2(0, 0)  # Vector2(0, 0) player.pos - self.pos
+        self.pos_render = Vector2(-1000, -1000)  # Vector2(0, 0) player.pos - self.pos
         self.offset = Vector2(0, 0)  # We shift the sprite 50 px to the right.
         self.angle = randint(-180, 180) * math.pi / 180
         self.a = 30

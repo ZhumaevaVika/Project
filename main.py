@@ -3,7 +3,7 @@ import pygame.math
 from player import generate_player
 from food import generate_food
 from hit_functions import food_hit
-from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, draw_background
+from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, draw_background, draw_die_screen
 from config import FPS, HEIGHT, WIDTH, LIGHT_GREY
 import copy
 
@@ -35,8 +35,9 @@ def main():
     time_click_passed = 0
     mouse_up = 1
     bullets = []
+    alive = True
 
-    while True:
+    while alive:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
@@ -62,6 +63,7 @@ def main():
                 for food in arr_food_to_render:
                     bul.damage_food(food, bullets, arr_food, arr_food_to_render, player)
 
+        alive = player.death()
         player.hit_food(arr_food, arr_food_to_render)
         food_hit(arr_food_to_render)
         player_sprites.update(event_mouse)
@@ -75,11 +77,38 @@ def main():
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)
-        if player.HP > 0:
-            draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000, upgrade_bars_to_render)
+        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000, upgrade_bars_to_render)
         draw_health_bars_for_food(screen, arr_food_to_render)
         pg.display.flip()
         clock.tick(FPS)
+
+    print('you died')
+
+    while not alive:
+        clock.tick(FPS)
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                return
+            elif event.type == pg.KEYDOWN:
+                if (event.key == pg.K_RETURN) or (event.key == pg.K_KP_ENTER):
+                    alive = True
+                    main()
+
+        food_hit(arr_food_to_render)
+        food_sprite_to_render = player.render_food(arr_food, arr_food_to_render)
+        food_sprite_to_render.update()
+        bullet_sprites.update(event_mouse, player)
+        screen.fill(LIGHT_GREY)
+
+        draw_background(WIDTH, HEIGHT, screen, start_point, player.pos)
+        bullet_sprites.draw(screen)
+        food_sprite_to_render.draw(screen)
+        draw_health_bars_for_food(screen, arr_food_to_render)
+        draw_die_screen(screen, player.XP, player.level)
+        pg.display.flip()
+        clock.tick(FPS)
+        pg.display.update()
+    pg.quit()
 
 
 if __name__ == '__main__':

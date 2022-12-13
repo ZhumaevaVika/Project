@@ -4,6 +4,7 @@ import math
 from random import randint, randrange, choice
 from hit_functions import in_polygon, objects_hit
 
+
 class Player(pg.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
@@ -134,6 +135,12 @@ class Player(pg.sprite.Sprite):
             player_sprites.remove(self)
             player, player_sprites = generate_player('FlankGuard', self)
         return player, player_sprites
+
+    def death(self):
+        if self.HP <= 0:
+            self.kill()
+            return False
+        return True
 
     def update(self, event):
         if event == (0, 0):
