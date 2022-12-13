@@ -1,6 +1,4 @@
 import pygame as pg
-import pygame.math
-
 from Objects import Generator, food_hit
 from Visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, draw_background
 from config import FPS, HEIGHT, WIDTH, WHITE
@@ -42,8 +40,11 @@ def main():
                 event_mouse = event
             elif event.type == pg.KEYDOWN:
                 event_keydown = event
-                player.upgrade(event_keydown)
+                player.upgrade_on_key(event_keydown)
                 player, player_sprites = player.chose_class(event_keydown, player, player_sprites)
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                event_mousedown = event
+                player.upgrade_on_mouse(event_mousedown)
             mouse_up, time_click_passed = player.get_shoot_delay(event, time_click_passed, mouse_up)
         if mouse_up:
             time_click_passed += 1

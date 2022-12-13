@@ -24,7 +24,7 @@ def objects_hit(f1, f2):
     f2.pos.y = yc + (f2.pos.y - yc) * k
     x = f2.pos.x - f1.pos.x
     y = f2.pos.y - f1.pos.y
-    p = (2 / (f1.m + f2.m)) * ((f2.vx - f1.vx) * x + (f2.vy - f1.vy) * y) / (x**2 + y**2)
+    p = (2 / (f1.m + f2.m)) * ((f2.vx - f1.vx) * x + (f2.vy - f1.vy) * y) / (x ** 2 + y ** 2)
     f1.vx += p * f2.m * x
     f1.vy += p * f2.m * y
     f2.vx -= p * f1.m * x
@@ -67,7 +67,6 @@ class Player(pg.sprite.Sprite):
         self.bullet_penetration = 7
         self.bullet_damage = 7
         self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
-          # С увеличением уровня падает скорость
 
         self.regen_points = 0
         self.max_HP_points = 0
@@ -112,31 +111,47 @@ class Player(pg.sprite.Sprite):
         if keys:
             self.move(keys)
 
-    def upgrade(self, event):
+    def upgrade_on_key(self, event):
         if event.key == pg.K_1:
             self.health_regen_up()
-            print('regen ', self.regen_points, ' skill points ', self.skill_points)
         if event.key == pg.K_2:
             self.max_health_up()
-            print('max HP ', self.max_HP_points, ' skill points ', self.skill_points)
         if event.key == pg.K_3:
             self.body_damage_up()
-            print('body damage ', self.BD_points, ' skill points ', self.skill_points)
         if event.key == pg.K_4:
             self.bullet_speed_up()
-            print('bullet speed ', self.bullet_speed_points, ' skill points ', self.skill_points)
         if event.key == pg.K_5:
             self.bullet_penetration_up()
-            print('bullet penetration ', self.bullet_penetration_points, ' skill points ', self.skill_points)
         if event.key == pg.K_6:
             self.bullet_damage_up()
-            print('bullets damage ', self.bullet_damage_points, ' skill points ', self.skill_points)
         if event.key == pg.K_7:
             self.reload_up()
-            print('reload ', self.reload_points, ' skill points ', self.skill_points)
         if event.key == pg.K_8:
             self.speed_up()
-            print('speed ', self.speed_points, ' skill points ', self.skill_points)
+
+    def upgrade_on_mouse(self, event):
+        x1 = 136
+        y1 = 601
+        x2 = 166
+        y2 = 613
+        dy = 15
+        if x1 <= event.pos[0] <= x2:
+            if y1 <= event.pos[1] <= y2:
+                self.health_regen_up()
+            if y1 + dy <= event.pos[1] <= y2 + dy:
+                self.max_health_up()
+            if y1 + 2 * dy <= event.pos[1] <= y2 + 2 * dy:
+                self.body_damage_up()
+            if y1 + 3 * dy <= event.pos[1] <= y2 + 3 * dy:
+                self.bullet_speed_up()
+            if y1 + 4 * dy <= event.pos[1] <= y2 + 4 * dy:
+                self.bullet_penetration_up()
+            if y1 + 5 * dy <= event.pos[1] <= y2 + 5 * dy:
+                self.bullet_damage_up()
+            if y1 + 6 * dy <= event.pos[1] <= y2 + 6 * dy:
+                self.reload_up()
+            if y1 + 7 * dy <= event.pos[1] <= y2 + 7 * dy:
+                self.speed_up()
 
     def chose_class(self, event, player, player_sprites):
         generator = Generator()
@@ -253,7 +268,6 @@ class Player(pg.sprite.Sprite):
                 self.skill_points += 1
             elif (self.level >= 30) and (self.level % 3 == 0):
                 self.skill_points += 1
-            print('level ', self.level, ' skill points ', self.skill_points)
 
     def health_regen_up(self):
         if (self.regen_points < 7) and (self.skill_points > 0):
@@ -315,7 +329,7 @@ class Player(pg.sprite.Sprite):
             self.regen_time += 1
         else:
             self.regen_time = 0
-        if self.regen_time > 6000/self.regen:
+        if self.regen_time > 6000 / self.regen:
             self.HP += 1
 
     def render_food(self, arr_food, arr_food_to_render):
@@ -399,7 +413,7 @@ class Bullet(pg.sprite.Sprite):
         if self.penetration <= 0:
             self.kill()
             bullets.remove(self)
-            
+
 
 class Twin(Player):
     def __init__(self, player):
@@ -712,7 +726,7 @@ class Food(pg.sprite.Sprite):
         n = self.n
         a = self.a + r
         for i in range(n):
-            self.tpx[i] = x + a * math.cos(angle + i * 2 * math.pi / n) 
+            self.tpx[i] = x + a * math.cos(angle + i * 2 * math.pi / n)
             self.tpy[i] = y + a * math.sin(angle + i * 2 * math.pi / n)
         return self.tpx, self.tpy
 
