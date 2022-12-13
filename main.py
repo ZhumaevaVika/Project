@@ -42,8 +42,11 @@ def main():
                 event_mouse = event
             elif event.type == pg.KEYDOWN:
                 event_keydown = event
-                player.upgrade(event_keydown)
+                player.upgrade_on_key(event_keydown)
                 player, player_sprites = player.chose_class(event_keydown, player, player_sprites)
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                event_mousedown = event
+                player.upgrade_on_mouse(event_mousedown)
             mouse_up, time_click_passed = player.get_shoot_delay(event, time_click_passed, mouse_up)
         if mouse_up:
             time_click_passed += 1
@@ -66,6 +69,7 @@ def main():
         upgrade_bars_to_render = update_upgrade_bars(arr_upgrade_bars, player)
         screen.fill(WHITE)
 
+        draw_background(WIDTH, HEIGHT,screen)
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)

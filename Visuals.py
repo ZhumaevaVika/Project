@@ -241,17 +241,20 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
     # player health bar
     if player.HP < player.max_HP:
         if player.HP >= 0:
-            draw_bar(screen, Vector2(width // 2, height // 2 + 50), 50, 8, ANOTHER_GREEN, player.HP, player.max_HP)
+            draw_bar(screen, Vector2(width // 2, height // 2 + 30), 50, 8, ANOTHER_GREEN, player.HP, player.max_HP)
         else:
-            draw_bar(screen, Vector2(width // 2, height // 2 + 50), 50, 8, ANOTHER_GREEN, 0, player.max_HP)
+            draw_bar(screen, Vector2(width // 2, height // 2 + 30), 50, 8, ANOTHER_GREEN, 0, player.max_HP)
 
 
 def draw_health_bars_for_food(screen, arr_food_to_render):
     for food in arr_food_to_render:
-        if (food.HP >= 0) and (food.HP != food.max_HP):
+        if food.HP >= 0:
             draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 20), 50, 8, ANOTHER_GREEN, food.HP,
                      food.max_HP)
 
 
-if __name__ == "__main__":
-    print("This module is not for direct call!")
+def draw_background(width, height, screen):
+    for i in range(20):
+        pygame.draw.line(screen, GREY, (i*(width//20), 0), (i*(width//20), height), 1)
+    for i in range(20):
+        pygame.draw.line(screen, GREY, (0, i*(height//20)), (width, i*(height//20)), 1)
