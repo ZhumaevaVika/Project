@@ -1,7 +1,8 @@
 import pygame as pg
+import pygame.math
 
 from Objects import Generator, food_hit
-from Visuals import draw_bottom_interface
+from Visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food
 from config import FPS, HEIGHT, WIDTH, WHITE
 
 # TODO Графический интерфейс (Максим)
@@ -26,6 +27,7 @@ def main():
     player, player_sprites = generator.generate_player('Player', player)
     bullet_sprites = pg.sprite.Group()
     arr_food = generator.generate_food(arr_food, 1000)
+    arr_upgrade_bars = create_upgrade_bars(HEIGHT, player)
 
     event_mouse = (0, 0)
     time_click_passed = 0
@@ -61,12 +63,14 @@ def main():
         food_sprite_to_render = player.render_food(arr_food, arr_food_to_render)
         food_sprite_to_render.update()
         bullet_sprites.update(event_mouse, player)
+        upgrade_bars_to_render = update_upgrade_bars(arr_upgrade_bars, player)
         screen.fill(WHITE)
 
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)
-        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000)  # вот что добавлено (коммит с health bar)
+        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000, upgrade_bars_to_render)
+        draw_health_bars_for_food(screen, arr_food_to_render)
         pg.display.flip()
         clock.tick(FPS)
 

@@ -664,8 +664,10 @@ class Food(pg.sprite.Sprite):
         self.vx = self.speed * math.cos(self.angle * 6.28 / 360)
         self.vy = self.speed * math.sin(self.angle * 6.28 / 360)
         self.HP = 10
+        self.max_HP = 10
         self.XP = 10
         self.m = 10
+        self.has_not_health_bar = True
 
     def update(self):
         self.move()
@@ -720,6 +722,7 @@ class Square(Food):
         filename = 'Sprites/square.png'
         super().__init__(filename)
         self.HP = 10
+        self.max_HP = 10
         self.BD = 8  # Body_damage 8 HP
         self.XP = 10  # Score
         self.r = 19
@@ -737,6 +740,7 @@ class Triangle(Food):
         filename = 'Sprites/triangle.png'
         super().__init__(filename)
         self.HP = 30
+        self.max_HP = 30
         self.BD = 8  # Body_damage 8 HP
         self.XP = 25  # Score
         self.r = 15
@@ -754,6 +758,7 @@ class Pentagon(Food):
         filename = 'Sprites/pentagon.png'
         super().__init__(filename)
         self.HP = 100
+        self.max_HP = 100
         self.BD = 12  # Body_damage
         self.XP = 130
         self.r = 27
@@ -770,7 +775,8 @@ class AlphaPentagon(Food):
     def __init__(self):
         filename = 'Sprites/alpha_pentagon.png'
         super().__init__(filename)
-        self.HP = 1000
+        self.HP = 3000
+        self.max_HP = 3000
         self.BD = 20  # Body_damage
         self.XP = 1000
         self.r = 69
