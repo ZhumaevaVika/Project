@@ -3,7 +3,7 @@ import pygame.math
 from player import generate_player
 from food import generate_food
 from hit_functions import food_hit
-from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food
+from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, draw_background
 from config import FPS, HEIGHT, WIDTH, WHITE
 
 # TODO Графический интерфейс (Максим)
