@@ -11,7 +11,8 @@ def in_polygon(x, y, tpx, tpy):
                 and (x > (tpx[i - 1] - tpx[i]) * (y - tpy[i]) / (tpy[i - 1] - tpy[i]) + tpx[i]):
             c = 1 - c
     if c == 1:
-        return True   
+        return True
+
 
 def objects_hit(f1, f2):
     xc = (f1.pos.x * f1.m + f2.pos.x * f2.m) / (f1.m + f2.m)
@@ -36,7 +37,6 @@ def food_hit(arr_food_to_render):
             f2 = arr_food_to_render[j]
             if ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) <= (f1.r + f2.r) ** 2:
                 objects_hit(f1, f2)
-
 
 
 class Player(pg.sprite.Sprite):
@@ -308,7 +308,6 @@ class Player(pg.sprite.Sprite):
             self.speed = self.impulse / self.m
             self.speed_points += 1
             self.skill_points -= 1
-            
 
     def regenerate(self):
         if self.HP < self.max_HP:
@@ -387,7 +386,7 @@ class Bullet(pg.sprite.Sprite):
 
     def damage_food(self, food, bullets, arr_food, arr_food_to_render, player):
         if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 + \
-            (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
+                (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
             food.death(arr_food, player)
@@ -690,7 +689,7 @@ class Food(pg.sprite.Sprite):
             self.vx -= self.vx * 0.01
             self.vy -= self.vy * 0.01
         self.pos.x += self.vx
-        self.pos.y += self.vy 
+        self.pos.y += self.vy
         if self.pos.x >= 10000 or self.pos.x <= 0:
             self.vx *= -1
         if self.pos.y >= 10000 or self.pos.y <= 0:
@@ -705,7 +704,7 @@ class Food(pg.sprite.Sprite):
             generator = Generator()
             generator.generate_food(arr_food, 1)
 
-    def generate_hitbox(self, r = 0):
+    def generate_hitbox(self, r=0):
         angle = self.angle * math.pi / 180 + self.delta
         x = self.pos.x
         y = self.pos.y
@@ -778,7 +777,7 @@ class AlphaPentagon(Food):
         self.HP = 3000
         self.max_HP = 3000
         self.BD = 20  # Body_damage
-        self.XP = 1000
+        self.XP = 3000
         self.r = 69
         self.a = 85
         self.n = 5

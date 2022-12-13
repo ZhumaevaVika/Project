@@ -248,6 +248,6 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
 
 def draw_health_bars_for_food(screen, arr_food_to_render):
     for food in arr_food_to_render:
-        if food.HP >= 0:
+        if (food.HP >= 0) and (food.HP != food.max_HP):
             draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 20), 50, 8, ANOTHER_GREEN, food.HP,
                      food.max_HP)
