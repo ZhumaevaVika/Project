@@ -11,8 +11,23 @@ def in_polygon(x, y, tpx, tpy):
                 and (x > (tpx[i - 1] - tpx[i]) * (y - tpy[i]) / (tpy[i - 1] - tpy[i]) + tpx[i]):
             c = 1 - c
     if c == 1:
-        return True
+        return True   
 
+def objects_hit(f1, f2):
+    xc = (f1.pos.x * f1.m + f2.pos.x * f2.m) / (f1.m + f2.m)
+    yc = (f1.pos.y * f1.m + f2.pos.y * f2.m) / (f1.m + f2.m)
+    k = (f1.r + f2.r) / ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) ** 0.5
+    f1.pos.x = xc + (f1.pos.x - xc) * k
+    f1.pos.y = yc + (f1.pos.y - yc) * k
+    f2.pos.x = xc + (f2.pos.x - xc) * k
+    f2.pos.y = yc + (f2.pos.y - yc) * k
+    x = f2.pos.x - f1.pos.x
+    y = f2.pos.y - f1.pos.y
+    p = (2 / (f1.m + f2.m)) * ((f2.vx - f1.vx) * x + (f2.vy - f1.vy) * y) / (x**2 + y**2)
+    f1.vx += p * f2.m * x
+    f1.vy += p * f2.m * y
+    f2.vx -= p * f1.m * x
+    f2.vy -= p * f1.m * y
 
 def food_hit(arr_food_to_render):
     for i in range(len(arr_food_to_render) - 1):
@@ -20,22 +35,8 @@ def food_hit(arr_food_to_render):
             f1 = arr_food_to_render[i]
             f2 = arr_food_to_render[j]
             if ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) <= (f1.r + f2.r) ** 2:
-                xc = (f1.pos.x * f1.m + f2.pos.x * f2.m) / (f1.m + f2.m)
-                yc = (f1.pos.y * f2.m + f2.pos.y * f2.m) / (f1.m + f2.m)
-                k = (f1.r + f2.r) / ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) ** 0.5
-                f1.pos.x = xc + (f1.pos.x - xc) * k
-                f1.pos.y = yc + (f1.pos.y - yc) * k
-                f2.pos.x = xc + (f2.pos.x - xc) * k
-                f2.pos.y = yc + (f2.pos.y - yc) * k
-                x = f2.pos.x - f1.pos.x
-                y = f2.pos.y - f1.pos.y
-                p = (2 / (f1.m + f2.m)) * ((f2.vx - f1.vx) * x + (f2.vy - f1.vy) * y) / (x**2 + y**2)
-                f1.vx += p * f2.m * x
-                f1.vy += p * f2.m * y
-                f2.vx -= p * f1.m * x
-                f2.vy -= p * f1.m * y
-                f1.HP -= min(f1.HP, (f1.BD+f2.BD-4)//2) - 1
-                f2.HP -= min(f2.HP, (f1.BD+f2.BD-4)//2) - 1
+                objects_hit(f1, f2)
+
 
 
 class Player(pg.sprite.Sprite):
@@ -60,12 +61,12 @@ class Player(pg.sprite.Sprite):
         self.regen = 3.12  # 3.12% per second
         self.max_HP = 50
         self.HP = 50
-        self.BD = 30  # Body_damage 30 HP
+        self.BD = 5  # Body_damage 30 HP
         self.bullet_speed = 4
         self.bullet_penetration = 7
         self.bullet_damage = 7
         self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
-        self.speed = 3.5  # С увеличением уровня падает скорость
+          # С увеличением уровня падает скорость
 
         self.regen_points = 0
         self.max_HP_points = 0
@@ -76,9 +77,12 @@ class Player(pg.sprite.Sprite):
         self.reload_points = 0
         self.speed_points = 0
 
-        self.m = 50
-        self.impulse = 200
-        self.r = 32
+        self.vx = 0
+        self.vy = 0
+        self.m = 20
+        self.impulse = 100
+        self.speed = self.impulse / self.m
+        self.r = 30
 
         if player is None:
             self.level = 1
@@ -95,7 +99,8 @@ class Player(pg.sprite.Sprite):
     def hit_food(self, arr_food, arr_food_to_render):
         for food in arr_food_to_render:
             if in_polygon(self.pos.x, self.pos.y, food.generate_hitbox(self.r)[0], food.generate_hitbox(self.r)[1]):
-                self.HP -= int(min(self.BD, food.HP))
+                objects_hit(self, food)
+                self.HP -= int(min(food.BD, food.HP))
                 self.regen_time = 0
                 food.HP -= min(self.BD, food.HP)
                 food.death(arr_food_to_render, self)
@@ -181,6 +186,12 @@ class Player(pg.sprite.Sprite):
     def move(self, keys):
         x = 0
         y = 0
+        k = self.speed / 160
+        boost = 100 * k ** 2
+        self.vx -= self.vx * k
+        self.vy -= self.vy * k
+        self.pos.x += self.vx
+        self.pos.y += self.vy
         if keys[pg.K_w]:
             y -= 1
         if keys[pg.K_a]:
@@ -191,8 +202,10 @@ class Player(pg.sprite.Sprite):
             x += 1
         a = (x ** 2 + y ** 2) ** 0.5
         if a > 0:
-            self.pos.x += int(self.speed * x / a)
-            self.pos.y += int(self.speed * y / a)
+            self.vx += boost * x / a - self.vx * k
+            self.vy += boost * y / a - self.vy * k
+            self.pos.x += self.vx
+            self.pos.y += self.vy
         if self.pos.x >= 10000:
             self.pos.x = 10000
         if self.pos.y >= 10000:
@@ -209,6 +222,9 @@ class Player(pg.sprite.Sprite):
                 bullets.append(bullet)
                 bullet_sprites.add(bullet)
                 bullet.angle_update(pg.mouse.get_pos())
+                k = bullet.m * self.bullet_speed / self.m
+                self.vx -= k * math.cos(bullet.angle * 6.28 / 360)
+                self.vy -= k * math.sin(bullet.angle * 6.28 / 360)
         except AttributeError:
             pass
 
@@ -230,7 +246,7 @@ class Player(pg.sprite.Sprite):
             self.level += 1
             self.max_HP = 50 + 2 * (self.level - 1)
             self.HP += 2
-            self.m += 1.5
+            self.m += 0.5
             self.speed = self.impulse / self.m
             if 2 <= self.level <= 28:
                 self.skill_points += 1
@@ -255,7 +271,7 @@ class Player(pg.sprite.Sprite):
 
     def body_damage_up(self):
         if (self.BD_points < 7) and (self.skill_points > 0):
-            self.BD += 6
+            self.BD += 3
             self.BD_points += 1
             self.skill_points -= 1
 
@@ -288,9 +304,11 @@ class Player(pg.sprite.Sprite):
 
     def speed_up(self):
         if (self.speed_points < 7) and (self.skill_points > 0):
-            self.impulse += 50
+            self.impulse += 20
+            self.speed = self.impulse / self.m
             self.speed_points += 1
             self.skill_points -= 1
+            
 
     def regenerate(self):
         if self.HP < self.max_HP:
@@ -332,6 +350,7 @@ class Bullet(pg.sprite.Sprite):
                               self.len * math.sin(player.angle * 6.28 / 360))
         self.angle = 0
         self.r = 10
+        self.m = 3
 
         self.speed = player.bullet_speed  # Не точно
         self.penetration = player.bullet_penetration  # Не точно
@@ -368,7 +387,7 @@ class Bullet(pg.sprite.Sprite):
 
     def damage_food(self, food, bullets, arr_food, arr_food_to_render, player):
         if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 + \
-                (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
+            (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
             food.death(arr_food, player)
@@ -408,6 +427,9 @@ class Twin(Player):
                 bullets.append(bullet)
                 bullet_sprites.add(bullet)
                 bullet.angle_update(pg.mouse.get_pos())
+                k = bullet.m * self.bullet_speed / self.m
+                self.vx -= k * math.cos(bullet.angle * 6.28 / 360)
+                self.vy -= k * math.sin(bullet.angle * 6.28 / 360)
         except AttributeError:
             pass
 
@@ -523,6 +545,9 @@ class MachineGun(Player):
                 bullets.append(bullet)
                 bullet_sprites.add(bullet)
                 bullet.angle_update(pg.mouse.get_pos())
+                k = bullet.m * self.bullet_speed / self.m
+                self.vx -= k * math.cos(bullet.angle * 6.28 / 360)
+                self.vy -= k * math.sin(bullet.angle * 6.28 / 360)
         except AttributeError:
             pass
 
@@ -633,8 +658,11 @@ class Food(pg.sprite.Sprite):
         self.n = 3  # число вершин хитбокса
         self.delta = 0  # сдвиг по углу хитбокса
         self.rotate_speed = 0.35  # скорость вращения спрайта
+        self.speed = 0.1
         self.vx = randint(-10, 10) / 100
         self.vy = (0.0101 - self.vx ** 2) ** 0.5 * [-1, 1][randrange(2)]
+        self.vx = self.speed * math.cos(self.angle * 6.28 / 360)
+        self.vy = self.speed * math.sin(self.angle * 6.28 / 360)
         self.HP = 10
         self.max_HP = 10
         self.XP = 10
@@ -657,8 +685,12 @@ class Food(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos_render + offset_rotated)
 
     def move(self):
+        speed = (self.vx ** 2 + self.vy ** 2) ** 0.5
+        if speed > self.speed:
+            self.vx -= self.vx * 0.01
+            self.vy -= self.vy * 0.01
         self.pos.x += self.vx
-        self.pos.y += self.vy
+        self.pos.y += self.vy 
         if self.pos.x >= 10000 or self.pos.x <= 0:
             self.vx *= -1
         if self.pos.y >= 10000 or self.pos.y <= 0:
@@ -746,7 +778,7 @@ class AlphaPentagon(Food):
         self.HP = 3000
         self.max_HP = 3000
         self.BD = 20  # Body_damage
-        self.XP = 3000
+        self.XP = 1000
         self.r = 69
         self.a = 85
         self.n = 5
