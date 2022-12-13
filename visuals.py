@@ -1,5 +1,6 @@
 import pygame
-from config import GREY, WHITE, RED, GREEN, ORANGE, PURPLE, DARK_PURPLE, YELLOW, BLUE, ANOTHER_GREEN, CYAN
+from config import GREY, WHITE, RED, GREEN, ORANGE, PURPLE, DARK_PURPLE, YELLOW, BLUE, ANOTHER_GREEN, CYAN, \
+    LIGHT_GREY, ANOTHER_GREY
 from pygame.math import Vector2
 
 
@@ -248,13 +249,29 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
 
 def draw_health_bars_for_food(screen, arr_food_to_render):
     for food in arr_food_to_render:
-        if food.HP >= 0:
-            draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 20), 50, 8, ANOTHER_GREEN, food.HP,
+        if (food.HP >= 0) and (food.HP != food.max_HP):
+            draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 30), 50, 8, ANOTHER_GREEN, food.HP,
                      food.max_HP)
 
 
-def draw_background(width, height, screen):
-    for i in range(20):
-        pygame.draw.line(screen, GREY, (i*(width//20), 0), (i*(width//20), height), 1)
-    for i in range(20):
-        pygame.draw.line(screen, GREY, (0, i*(height//20)), (width, i*(height//20)), 1)
+def draw_background(width, height, screen, start_point, pos):
+    shift_x = - (pos.x - start_point.x) % 25
+    shift_y = - (pos.y - start_point.y) % 25
+    for i in range(40):
+        pygame.draw.line(screen, ANOTHER_GREY, (i*(width//40) + shift_x, 0), (i*(width//40) + shift_x, height), 2)
+    for i in range(30):
+        pygame.draw.line(screen, ANOTHER_GREY, (0, i*(height//30) + shift_y), (width, i*(height//30) + shift_y), 2)
+
+    if 10000 - pos.x <= width//2:
+        pygame.draw.rect(screen, GREY, pygame.Rect(width//2 + 10000 - pos.x, 0, width//2 - 10000 + pos.x, height))
+    elif pos.x <= width//2:
+        pygame.draw.rect(screen, GREY, pygame.Rect(0, 0, width // 2 - pos.x, height))
+    if 10000 - pos.y <= height//2:
+        pygame.draw.rect(screen, GREY, pygame.Rect(0, height//2 + 10000 - pos.y, width, height//2 - 10000 + pos.y))
+    elif pos.y <= height//2:
+        pygame.draw.rect(screen, GREY, pygame.Rect(0, 0, width, height // 2 - pos.y))
+
+# def draw_choose_class_menu(width, height, screen, player):
+    #if player.level == 15:
+
+

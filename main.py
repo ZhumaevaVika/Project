@@ -4,7 +4,8 @@ from player import generate_player
 from food import generate_food
 from hit_functions import food_hit
 from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, draw_background
-from config import FPS, HEIGHT, WIDTH, WHITE
+from config import FPS, HEIGHT, WIDTH, LIGHT_GREY
+import copy
 
 # TODO Графический интерфейс (Максим)
 # TODO Отрисовывать границы карты, потому что не понятно где она кончается (Максим)
@@ -28,6 +29,7 @@ def main():
     bullet_sprites = pg.sprite.Group()
     arr_food = generate_food(arr_food, 1000)
     arr_upgrade_bars = create_upgrade_bars(HEIGHT, player)
+    start_point = copy.copy(player.pos)
 
     event_mouse = (0, 0)
     time_click_passed = 0
@@ -67,13 +69,14 @@ def main():
         food_sprite_to_render.update()
         bullet_sprites.update(event_mouse, player)
         upgrade_bars_to_render = update_upgrade_bars(arr_upgrade_bars, player)
-        screen.fill(WHITE)
+        screen.fill(LIGHT_GREY)
 
-        draw_background(WIDTH, HEIGHT,screen)
+        draw_background(WIDTH, HEIGHT, screen, start_point, player.pos)
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)
-        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000, upgrade_bars_to_render)
+        if player.HP > 0:
+            draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000, upgrade_bars_to_render)
         draw_health_bars_for_food(screen, arr_food_to_render)
         pg.display.flip()
         clock.tick(FPS)

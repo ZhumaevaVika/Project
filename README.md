@@ -11,7 +11,7 @@
 
 ## Описание
 
-Копия игры Diep.io
+In Diep.io, the main objective for the player is to earn points by destroying different polygon objects and killing bots by firing bullets with their tank. By earning points, the tank levels up. Leveling up allows the player to invest a skill point into tank characteristics such as movement speed and bullet damage. Players can also upgrade their tank to more powerful classes every 15 levels up until level 45, giving them abilities other tanks may not have.
 
 ---
 ## Инструкция по установке
