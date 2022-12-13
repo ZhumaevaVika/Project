@@ -2,7 +2,8 @@ import pygame as pg
 import pygame.math
 
 from Objects import Generator, food_hit
-from Visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food
+from Visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, \
+    draw_background
 from config import FPS, HEIGHT, WIDTH, WHITE
 
 # TODO Графический интерфейс (Максим)
@@ -66,6 +67,7 @@ def main():
         upgrade_bars_to_render = update_upgrade_bars(arr_upgrade_bars, player)
         screen.fill(WHITE)
 
+        draw_background(WIDTH, HEIGHT,screen)
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)
