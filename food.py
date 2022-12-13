@@ -80,7 +80,7 @@ class Food(pg.sprite.Sprite):
             player.XP += self.XP
             generate_food(arr_food, 1)
 
-    def generate_hitbox(self, r = 0):
+    def generate_hitbox(self, r=0):
         angle = self.angle + self.delta
         x = self.pos.x
         y = self.pos.y

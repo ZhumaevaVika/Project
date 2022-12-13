@@ -1,22 +1,22 @@
 import pygame as pg
-import pygame.math
 from player import generate_player
 from food import generate_food
 from hit_functions import food_hit
-from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, draw_background, draw_die_screen
+from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, \
+    draw_background, draw_die_screen
 from config import FPS, HEIGHT, WIDTH, LIGHT_GREY
 import copy
 
-# TODO Графический интерфейс (Максим)
-# TODO Отрисовывать границы карты, потому что не понятно где она кончается (Максим)
 # TODO Добавить ботов (для начала с простым интеллектом,
 #  по типу рандомный спавн со случайным уровнем и прокачкой, едут за игроком и стреляют в него) (Вика)
+# TODO Кнопки для классов (Максим)
+# TODO Хитбоксы к кнопкам (Вика)
+# TODO Документация (Максим, Ваня)
+# TODO Презентация (Максим, Вика, Ваня)
+# TODO При наведении мыши показывать прокачку (Вика)
+# TODO Отскок пуль от еды (Ваня)
 
-# FIXME Танк слишком медленный, надо подобрать значения массы и скорости. При движении по диагонали скорость
-#  маленькая (Ваня)
-# FIXME Сделать, чтобы Twin по очереди стрелял из пушек (395 строка в Objects) (Ваня)
-# FIXME При смене класса сбрасывается прокачка, skill points остаются (Вика)
-# FIXME Если набрать много очков, при отрисовке зеленая линия выходит за границы (Максим)
+# FIXME При смене класса сбрасывается прокачка, skill points остаются (Ваня)
 
 
 def main():
@@ -81,8 +81,6 @@ def main():
         draw_health_bars_for_food(screen, arr_food_to_render)
         pg.display.flip()
         clock.tick(FPS)
-
-    print('you died')
 
     while not alive:
         clock.tick(FPS)

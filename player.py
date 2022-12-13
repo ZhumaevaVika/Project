@@ -1,7 +1,7 @@
 import pygame as pg
 from pygame.math import Vector2
 import math
-from random import randint, randrange, choice
+from random import randint
 from hit_functions import in_polygon, objects_hit
 
 
@@ -292,7 +292,7 @@ class Player(pg.sprite.Sprite):
             self.impulse += 20
             self.speed = self.impulse / self.m
             self.speed_points += 1
-            self.skill_points -= 1        
+            self.skill_points -= 1
 
     def regenerate(self):
         if self.HP < self.max_HP:
@@ -370,7 +370,7 @@ class Bullet(pg.sprite.Sprite):
 
     def damage_food(self, food, bullets, arr_food, arr_food_to_render, player):
         if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 + \
-            (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
+                (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(self.damage, food.HP)
             food.HP -= min(self.damage, food.HP)
             food.death(arr_food, player)
@@ -571,7 +571,7 @@ class MachineGunBullet(Bullet):
             self.angle = -80 * (event[1] - self.pos_render.y) / abs(event[1] - self.pos_render.y)
         if event[0] < self.pos_render.x:
             self.angle += math.pi
-        self.angle += randint(-15, 15) / 180 * math.pi 
+        self.angle += randint(-15, 15) / 180 * math.pi
 
 
 class FlankGuard(Player):
@@ -652,21 +652,6 @@ def generate_player(type, player):
         player = FlankGuard(player)
         player_sprites = pg.sprite.Group(player)
     return player, player_sprites
-
-    def generate_food(self, arr_food, n_max):
-        variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]
-        for i in range(n_max):
-            food = choice(variants)
-            if food == 0:
-                sq = Square()
-                arr_food.append(sq)
-            elif food == 1:
-                tr = Triangle()
-                arr_food.append(tr)
-            else:
-                pn = Pentagon()
-                arr_food.append(pn)
-        return arr_food
 
 
 if __name__ == "__main__":

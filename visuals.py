@@ -1,6 +1,6 @@
 import pygame
 from config import GREY, WHITE, RED, GREEN, ORANGE, PURPLE, DARK_PURPLE, YELLOW, BLUE, ANOTHER_GREEN, CYAN, \
-    LIGHT_GREY, ANOTHER_GREY
+    ANOTHER_GREY
 from pygame.math import Vector2
 
 
@@ -18,7 +18,7 @@ class UpgradeBar(pygame.sprite.Sprite):
 
         self.image = pygame.Surface((self.width + 20, self.height + 5), pygame.SRCALPHA)
 
-        draw_upgrade_bar(self.image, Vector2(self.width//2 + 10, self.height//2), self.width, self.height,
+        draw_upgrade_bar(self.image, Vector2(self.width // 2 + 10, self.height // 2), self.width, self.height,
                          self.color, self.value, self.max_value, self.text, self.number_button)
 
         self.rect = self.image.get_rect()
@@ -91,7 +91,6 @@ def draw_text(screen, pos, size, text, font='freesansbold.ttf'):
 
 def draw_bar(screen, pos, width, height, color, value, max_value):
     value_to_px = int((value / max_value) * width)
-    font = pygame.font.Font('freesansbold.ttf', height - 2)
     # Gray borders of health bar line
     pygame.draw.line(screen, GREY, (pos.x - width // 2, pos.y),
                      (pos.x + width // 2, pos.y), height)
@@ -110,15 +109,15 @@ def draw_bar_with_text(screen, pos, width, height, color, value, max_value, text
     text_main = font.render(text, True, WHITE)
     text_add = font.render(text, True, GREY)
     # Gray borders of health bar line
-    pygame.draw.line(screen, GREY, (pos.x - width//2, pos.y),
-                     (pos.x + width//2, pos.y), height)
-    pygame.draw.circle(screen, GREY, (pos.x - width//2, pos.y + 1), height//2)
-    pygame.draw.circle(screen, GREY, (pos.x + width//2, pos.y + 1), height//2)
+    pygame.draw.line(screen, GREY, (pos.x - width // 2, pos.y),
+                     (pos.x + width // 2, pos.y), height)
+    pygame.draw.circle(screen, GREY, (pos.x - width // 2, pos.y + 1), height // 2)
+    pygame.draw.circle(screen, GREY, (pos.x + width // 2, pos.y + 1), height // 2)
     # Health bar line
-    pygame.draw.line(screen, color, (pos.x - width//2, pos.y),
-                     (pos.x - width//2 + value_to_px, pos.y), height - 2)
-    pygame.draw.circle(screen, color, (pos.x - width//2, pos.y + 1), (height - 2)//2)
-    pygame.draw.circle(screen, color, (pos.x - width//2 + value_to_px, pos.y + 1), (height - 2)//2)
+    pygame.draw.line(screen, color, (pos.x - width // 2, pos.y),
+                     (pos.x - width // 2 + value_to_px, pos.y), height - 2)
+    pygame.draw.circle(screen, color, (pos.x - width // 2, pos.y + 1), (height - 2) // 2)
+    pygame.draw.circle(screen, color, (pos.x - width // 2 + value_to_px, pos.y + 1), (height - 2) // 2)
     # text render
     text_main_rect = text_main.get_rect()
     text_add_rect = text_add.get_rect()
@@ -137,7 +136,7 @@ def draw_bar_with_text(screen, pos, width, height, color, value, max_value, text
 
 
 def draw_upgrade_bar(screen, pos, width, height, color, value, max_value, text, number_button):
-    value_to_px = int((value / max_value) * (5 * width//6))
+    value_to_px = int((value / max_value) * (5 * width // 6))
     font = pygame.font.Font('freesansbold.ttf', height - 2)
     text_main = font.render(text, True, WHITE)
     text_add = font.render(text, True, GREY)
@@ -153,7 +152,7 @@ def draw_upgrade_bar(screen, pos, width, height, color, value, max_value, text, 
     pygame.draw.circle(screen, color, (pos.x + width // 2, pos.y + 1), (height - 2) // 2)
     if value != 0:
         pygame.draw.line(screen, color, (pos.x - width // 2, pos.y),
-                                (pos.x - width // 2 + value_to_px, pos.y), height - 2)
+                         (pos.x - width // 2 + value_to_px, pos.y), height - 2)
         pygame.draw.circle(screen, color, (pos.x - width // 2, pos.y + 1), (height - 2) // 2)
     # pygame.draw.circle(screen, color, (pos.x - width // 2 + value_to_px, pos.y + 1), (height - 2) // 2)
     for i in range(max_value):
@@ -164,19 +163,19 @@ def draw_upgrade_bar(screen, pos, width, height, color, value, max_value, text, 
     text_main_rect = text_main.get_rect()
     text_add_rect = text_add.get_rect()
     # White borders of text
-    text_main_rect.center = (pos.x - width//10, pos.y + 1)
-    text_add_rect.center = (pos.x - width//10, pos.y + 1 - 1)
+    text_main_rect.center = (pos.x - width // 10, pos.y + 1)
+    text_add_rect.center = (pos.x - width // 10, pos.y + 1 - 1)
     screen.blit(text_add, text_add_rect)
-    text_add_rect.center = (pos.x - width//10, pos.y + 1 + 1)
+    text_add_rect.center = (pos.x - width // 10, pos.y + 1 + 1)
     screen.blit(text_add, text_add_rect)
-    text_add_rect.center = (pos.x - 1 - width//10, pos.y + 1)
+    text_add_rect.center = (pos.x - 1 - width // 10, pos.y + 1)
     screen.blit(text_add, text_add_rect)
-    text_add_rect.center = (pos.x + 1 - width//10, pos.y + 1)
+    text_add_rect.center = (pos.x + 1 - width // 10, pos.y + 1)
     screen.blit(text_add, text_add_rect)
     # Main gray text
     screen.blit(text_main, text_main_rect)
-    draw_text(screen, Vector2(pos.x + width//4 + 5, pos.y), 6, '[' + str(number_button) + ']')
-    pygame.draw.rect(screen, GREY, pygame.Rect(pos.x + width//2 - 14, pos.y - 1, 9, 3))
+    draw_text(screen, Vector2(pos.x + width // 4 + 5, pos.y), 6, '[' + str(number_button) + ']')
+    pygame.draw.rect(screen, GREY, pygame.Rect(pos.x + width // 2 - 14, pos.y - 1, 9, 3))
     pygame.draw.rect(screen, GREY, pygame.Rect(pos.x + width // 2 - 14 + 3, pos.y - 1 - 3, 3, 9))
 
 
@@ -228,7 +227,7 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
                            score_func, 'Lvl ' + str(player.level) + ' ' + player.class_type)
     # green score bar
     if player.XP <= top_score:
-        draw_bar_with_text(screen, Vector2(width//2, height - 45), 150, 12, GREEN, player.XP, top_score,
+        draw_bar_with_text(screen, Vector2(width // 2, height - 45), 150, 12, GREEN, player.XP, top_score,
                            "Score: " + str(player.XP))
     else:
         draw_bar_with_text(screen, Vector2(width // 2, height - 45), 150, 12, GREEN, 1, 1,
@@ -258,17 +257,19 @@ def draw_background(width, height, screen, start_point, pos):
     shift_x = - (pos.x - start_point.x) % 25
     shift_y = - (pos.y - start_point.y) % 25
     for i in range(40):
-        pygame.draw.line(screen, ANOTHER_GREY, (i*(width//40) + shift_x, 0), (i*(width//40) + shift_x, height), 2)
+        pygame.draw.line(screen, ANOTHER_GREY, (i * (width // 40) + shift_x, 0), (i * (width // 40) + shift_x, height),
+                         2)
     for i in range(30):
-        pygame.draw.line(screen, ANOTHER_GREY, (0, i*(height//30) + shift_y), (width, i*(height//30) + shift_y), 2)
+        pygame.draw.line(screen, ANOTHER_GREY, (0, i * (height // 30) + shift_y), (width, i * (height // 30) + shift_y),
+                         2)
 
-    if 10000 - pos.x <= width//2:
-        pygame.draw.rect(screen, GREY, pygame.Rect(width//2 + 10000 - pos.x, 0, width//2 - 10000 + pos.x, height))
-    elif pos.x <= width//2:
+    if 10000 - pos.x <= width // 2:
+        pygame.draw.rect(screen, GREY, pygame.Rect(width // 2 + 10000 - pos.x, 0, width // 2 - 10000 + pos.x, height))
+    elif pos.x <= width // 2:
         pygame.draw.rect(screen, GREY, pygame.Rect(0, 0, width // 2 - pos.x, height))
-    if 10000 - pos.y <= height//2:
-        pygame.draw.rect(screen, GREY, pygame.Rect(0, height//2 + 10000 - pos.y, width, height//2 - 10000 + pos.y))
-    elif pos.y <= height//2:
+    if 10000 - pos.y <= height // 2:
+        pygame.draw.rect(screen, GREY, pygame.Rect(0, height // 2 + 10000 - pos.y, width, height // 2 - 10000 + pos.y))
+    elif pos.y <= height // 2:
         pygame.draw.rect(screen, GREY, pygame.Rect(0, 0, width, height // 2 - pos.y))
 
 
@@ -280,4 +281,3 @@ def draw_die_screen(screen, score, level):
     draw_text(screen, Vector2(500, 280), 32, text1)
     draw_text(screen, Vector2(500, 315), 32, text2)
     draw_text(screen, Vector2(500, 365), 32, 'Press enter to continue')
-
