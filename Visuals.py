@@ -251,3 +251,7 @@ def draw_health_bars_for_food(screen, arr_food_to_render):
         if (food.HP >= 0) and (food.HP != food.max_HP):
             draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 20), 50, 8, ANOTHER_GREEN, food.HP,
                      food.max_HP)
+
+
+if __name__ == "__main__":
+    print("This module is not for direct call!")
