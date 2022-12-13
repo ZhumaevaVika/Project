@@ -2,8 +2,7 @@ import pygame as pg
 import pygame.math
 
 from Objects import Generator, food_hit
-from Visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, \
-    draw_background
+from Visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, draw_background
 from config import FPS, HEIGHT, WIDTH, WHITE
 
 # TODO Графический интерфейс (Максим)

@@ -251,3 +251,10 @@ def draw_health_bars_for_food(screen, arr_food_to_render):
         if food.HP >= 0:
             draw_bar(screen, Vector2(food.pos_render.x, food.pos_render.y + 20), 50, 8, ANOTHER_GREEN, food.HP,
                      food.max_HP)
+
+
+def draw_background(width, height, screen):
+    for i in range(20):
+        pygame.draw.line(screen, GREY, (i*(width//20), 0), (i*(width//20), height), 1)
+    for i in range(20):
+        pygame.draw.line(screen, GREY, (0, i*(height//20)), (width, i*(height//20)), 1)

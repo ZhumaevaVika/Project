@@ -30,6 +30,7 @@ def objects_hit(f1, f2):
     f2.vx -= p * f1.m * x
     f2.vy -= p * f1.m * y
 
+
 def food_hit(arr_food_to_render):
     for i in range(len(arr_food_to_render) - 1):
         for j in range(i + 1, len(arr_food_to_render)):
