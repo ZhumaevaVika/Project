@@ -331,7 +331,7 @@ def create_class_sprites():
 
 
 def choose_class_menu_launcher(choose_class_menu_on, choose_class_menu_on_flag, player):
-    if player.level == 2:
+    if player.level == 15:
         if choose_class_menu_on_flag == 0:
             choose_class_menu_on = True
             choose_class_menu_on_flag = 1
