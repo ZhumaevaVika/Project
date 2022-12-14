@@ -637,8 +637,8 @@ class FlankGuardBulletBack(Bullet):
 
     def move(self, player):
         self.shift = self.pos - player.pos
-        self.pos_render.x += self.speed * -math.cos(self.angle * 6.28 / 360)
-        self.pos_render.y += self.speed * -math.sin(self.angle * 6.28 / 360)
+        self.pos_render.x += self.speed * -math.cos(self.angle)
+        self.pos_render.y += self.speed * -math.sin(self.angle)
 
 
 def generate_player(type, player):

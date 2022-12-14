@@ -342,3 +342,7 @@ def draw_choose_class_menu(screen, class_sprites_to_render, choose_class_menu_on
     if choose_class_menu_on:
         draw_text(screen, Vector2(100, 30), 20, 'Upgrades')
         class_sprites_to_render.draw(screen)
+
+
+if __name__ == "__main__":
+    print("This module is not for direct call!")
