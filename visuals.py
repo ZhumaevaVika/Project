@@ -1,7 +1,39 @@
 import pygame
-from config import GREY, WHITE, RED, GREEN, ORANGE, PURPLE, DARK_PURPLE, YELLOW, BLUE, ANOTHER_GREEN, CYAN, \
-    ANOTHER_GREY
+from config import GREY, WHITE, RED, GREEN, ORANGE, PURPLE, DARK_PURPLE, YELLOW, BLUE, ANOTHER_GREEN, CYAN, ANOTHER_GREY
 from pygame.math import Vector2
+
+
+class IgnoreButton(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.pos = pos
+        self.image = pygame.Surface((70, 70), pygame.SRCALPHA)
+
+        draw_bar_with_text(self.image, Vector2(30, 10), 30, 15, ANOTHER_GREY, 1, 1, 'Ignore')
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.pos.x
+        self.rect.y = self.pos.y
+
+
+class PlayerClassSprite(pygame.sprite.Sprite):
+    def __init__(self, class_type, pos):
+        super().__init__()
+        self.pos = pos
+        self.image = pygame.Surface((75, 75))
+        self.image.set_colorkey((0, 0, 0))
+        if class_type == 'Twin':
+            self.orig_image = pygame.image.load('Sprites/twin_upgrade.jpg').convert()
+        elif class_type == 'Sniper':
+            self.orig_image = pygame.image.load('Sprites/sniper_upgrade.jpg').convert()
+        elif class_type == 'MachineGun':
+            self.orig_image = pygame.image.load('Sprites/machinegun_upgrade.jpg').convert()
+        else:
+            self.orig_image = pygame.image.load('Sprites/flankguard_upgrade.jpg').convert()
+        self.image.blit(self.orig_image, (0, 0), (0, 0, 75, 75))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.pos.x
+        self.rect.y = self.pos.y
 
 
 class UpgradeBar(pygame.sprite.Sprite):
@@ -281,3 +313,32 @@ def draw_die_screen(screen, score, level):
     draw_text(screen, Vector2(500, 280), 32, text1)
     draw_text(screen, Vector2(500, 315), 32, text2)
     draw_text(screen, Vector2(500, 365), 32, 'Press enter to continue')
+
+
+def create_class_sprites():
+    twin = PlayerClassSprite('Twin', Vector2(20, 50))
+    sniper = PlayerClassSprite('Sniper', Vector2(100, 50))
+    machinegun = PlayerClassSprite('MachineGun', Vector2(20, 130))
+    flankguard = PlayerClassSprite('FlankGuard', Vector2(100, 130))
+    ignorebutton = IgnoreButton(Vector2(70, 210))
+    class_sprites_to_render = pygame.sprite.Group()
+    class_sprites_to_render.add(twin)
+    class_sprites_to_render.add(sniper)
+    class_sprites_to_render.add(machinegun)
+    class_sprites_to_render.add(flankguard)
+    class_sprites_to_render.add(ignorebutton)
+    return class_sprites_to_render
+
+
+def choose_class_menu_launcher(choose_class_menu_on, choose_class_menu_on_flag, player):
+    if player.level == 2:
+        if choose_class_menu_on_flag == 0:
+            choose_class_menu_on = True
+            choose_class_menu_on_flag = 1
+    return choose_class_menu_on, choose_class_menu_on_flag
+
+
+def draw_choose_class_menu(screen, class_sprites_to_render, choose_class_menu_on):
+    if choose_class_menu_on:
+        draw_text(screen, Vector2(100, 30), 20, 'Upgrades')
+        class_sprites_to_render.draw(screen)

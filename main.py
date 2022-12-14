@@ -3,7 +3,7 @@ from player import generate_player
 from food import generate_food
 from hit_functions import food_hit
 from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, \
-    draw_background, draw_die_screen
+    draw_background, create_class_sprites, draw_choose_class_menu, draw_die_screen, choose_class_menu_launcher
 from config import FPS, HEIGHT, WIDTH, LIGHT_GREY
 import copy
 
@@ -30,7 +30,10 @@ def main():
     arr_food = generate_food(arr_food, 1000)
     arr_upgrade_bars = create_upgrade_bars(HEIGHT, player)
     start_point = copy.copy(player.pos)
+    class_sprites_to_render = create_class_sprites()
 
+    choose_class_menu_on = False
+    choose_class_menu_on_flag = 0
     event_mouse = (0, 0)
     time_click_passed = 0
     mouse_up = 1
@@ -46,10 +49,11 @@ def main():
             elif event.type == pg.KEYDOWN:
                 event_keydown = event
                 player.upgrade_on_key(event_keydown)
-                player, player_sprites = player.chose_class(event_keydown, player, player_sprites)
             elif event.type == pg.MOUSEBUTTONDOWN:
                 event_mousedown = event
                 player.upgrade_on_mouse(event_mousedown)
+                player, player_sprites, choose_class_menu_on = player.chose_class(event_mousedown, player,
+                                                                                  player_sprites, choose_class_menu_on)
             mouse_up, time_click_passed = player.get_shoot_delay(event, time_click_passed, mouse_up)
         if mouse_up:
             time_click_passed += 1
@@ -73,12 +77,15 @@ def main():
         upgrade_bars_to_render = update_upgrade_bars(arr_upgrade_bars, player)
         screen.fill(LIGHT_GREY)
 
+        choose_class_menu_on, choose_class_menu_on_flag = \
+            choose_class_menu_launcher(choose_class_menu_on, choose_class_menu_on_flag, player)
         draw_background(WIDTH, HEIGHT, screen, start_point, player.pos)
         bullet_sprites.draw(screen)
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)
         draw_bottom_interface(player, WIDTH, HEIGHT, screen, 5000, upgrade_bars_to_render)
         draw_health_bars_for_food(screen, arr_food_to_render)
+        draw_choose_class_menu(screen, class_sprites_to_render, choose_class_menu_on)
         pg.display.flip()
         clock.tick(FPS)
 

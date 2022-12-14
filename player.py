@@ -118,23 +118,29 @@ class Player(pg.sprite.Sprite):
             if y1 + 7 * dy <= event.pos[1] <= y2 + 7 * dy:
                 self.speed_up()
 
-    def chose_class(self, event, player, player_sprites):
-        if event.key == pg.K_g:
-            player_sprites.remove(self)
-            player, player_sprites = generate_player('Player', self)
-        if event.key == pg.K_h:
-            player_sprites.remove(self)
-            player, player_sprites = generate_player('Twin', self)
-        if event.key == pg.K_j:
-            player_sprites.remove(self)
-            player, player_sprites = generate_player('Sniper', self)
-        if event.key == pg.K_k:
-            player_sprites.remove(self)
-            player, player_sprites = generate_player('MachineGun', self)
-        if event.key == pg.K_l:
-            player_sprites.remove(self)
-            player, player_sprites = generate_player('FlankGuard', self)
-        return player, player_sprites
+    def chose_class(self, event, player, player_sprites, choose_class_menu_on):
+        if choose_class_menu_on:
+            if (79 <= event.pos[0] <= 121) and (213 <= event.pos[1] <= 226):
+                player_sprites.remove(self)
+                player, player_sprites = generate_player('Player', self)
+                choose_class_menu_on = False
+            if (20 <= event.pos[0] <= 95) and (50 <= event.pos[1] <= 125):
+                player_sprites.remove(self)
+                player, player_sprites = generate_player('Twin', self)
+                choose_class_menu_on = False
+            if (100 <= event.pos[0] <= 175) and (50 <= event.pos[1] <= 125):
+                player_sprites.remove(self)
+                player, player_sprites = generate_player('Sniper', self)
+                choose_class_menu_on = False
+            if (20 <= event.pos[0] <= 95) and (130 <= event.pos[1] <= 205):
+                player_sprites.remove(self)
+                player, player_sprites = generate_player('MachineGun', self)
+                choose_class_menu_on = False
+            if (100 <= event.pos[0] <= 175) and (130 <= event.pos[1] <= 205):
+                player_sprites.remove(self)
+                player, player_sprites = generate_player('FlankGuard', self)
+                choose_class_menu_on = False
+        return player, player_sprites, choose_class_menu_on
 
     def death(self):
         if self.HP <= 0:
