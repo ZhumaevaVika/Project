@@ -24,14 +24,14 @@ class Player(pg.sprite.Sprite):
         self.class_type = 'Tank'
         self.type = 'player'
 
-        self.regen = 3.12  # 3.12% per second
+        self.regen = 3.12
         self.max_HP = 50
         self.HP = 50
-        self.BD = 5  # Body_damage 30 HP
+        self.BD = 5
         self.bullet_speed = 4
         self.bullet_penetration = 7
         self.bullet_damage = 7
-        self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
+        self.reload = 36
 
         self.regen_points = 0
         self.max_HP_points = 0
@@ -52,7 +52,7 @@ class Player(pg.sprite.Sprite):
 
         if player is None:
             self.level = 1
-            self.XP = 0  # Score
+            self.XP = 0
             self.skill_points = 0
         else:
             self.pos = player.pos
@@ -63,6 +63,14 @@ class Player(pg.sprite.Sprite):
             self.HP = player.HP
 
     def hit_food(self, arr_food, arr_food_to_render):
+        """Hits and damages player and food on the screen.
+
+        Arguments:
+
+        arr_food -- array of food.
+
+        arr_food_to_render -- array of food on the screen.
+        """
         for food in arr_food_to_render:
             if in_polygon(self.pos.x, self.pos.y, food.generate_hitbox(self.r)[0], food.generate_hitbox(self.r)[1]):
                 objects_hit(self, food)
@@ -73,11 +81,19 @@ class Player(pg.sprite.Sprite):
                 food.death(arr_food, self)
 
     def if_keys(self):
+        """Moves player if something is pressed.
+        """
         keys = pg.key.get_pressed()
         if keys:
             self.move(keys)
 
     def upgrade_on_key(self, event):
+        """Upgrades player on keyboard buttons.
+
+        Arguments:
+
+        event -- pressing of button.
+        """
         if event.key == pg.K_1:
             self.health_regen_up()
         if event.key == pg.K_2:
@@ -96,6 +112,12 @@ class Player(pg.sprite.Sprite):
             self.speed_up()
 
     def upgrade_on_mouse(self, event):
+        """Upgrades player on mouse.
+
+        Arguments:
+
+        event -- mouse click.
+        """
         x1 = 136
         y1 = 601
         x2 = 166
@@ -119,7 +141,19 @@ class Player(pg.sprite.Sprite):
             if y1 + 7 * dy <= event.pos[1] <= y2 + 7 * dy:
                 self.speed_up()
 
-    def chose_class(self, event, player, player_sprites, choose_class_menu_on):
+    def choose_class(self, event, player, player_sprites, choose_class_menu_on):
+        """Chooses class of player after 15 lvl.
+
+        Arguments:
+
+        event -- mouse click.
+
+        player -- Player.
+
+        player_sprites -- array of player sprites.
+
+        choose_class_menu_on -- parameter (True if lvl > 15)
+        """
         if choose_class_menu_on:
             if (79 <= event.pos[0] <= 121) and (213 <= event.pos[1] <= 226):
                 player_sprites.remove(self)
@@ -144,12 +178,19 @@ class Player(pg.sprite.Sprite):
         return player, player_sprites, choose_class_menu_on
 
     def death(self, arr_bot, player, flag=0):
+        """Returns True if player is alive and False if he was killed.
+        """
         if self.HP <= 0:
             self.kill()
             return False
         return True
 
     def update(self, event, arr_bot):
+        """Updates angle of player.
+
+        Arguments:
+
+        event -- event of mouse."""
         if event == (0, 0):
             self.angle = 0
             self.rotate()
@@ -169,16 +210,20 @@ class Player(pg.sprite.Sprite):
         self.regenerate()
 
     def rotate(self):
-        """Rotate the image of the sprite around a pivot point."""
-        # Rotate the image.
+        """Rotate the image of the sprite around a pivot point.
+        """
         angle = self.angle * 180 / math.pi
         self.image = pg.transform.rotozoom(self.orig_image, -angle, 1)
-        # Rotate the offset vector.
         offset_rotated = self.offset.rotate(angle)
-        # Create a new rect with the center of the sprite + the offset.
         self.rect = self.image.get_rect(center=self.pos_render + offset_rotated)
 
     def move(self, keys):
+        """Moves and rotate player according to pressed buttons.
+
+        Arguments:
+
+        keys -- pressed buttons.
+        """
         x = 0
         y = 0
         k = self.speed / 160
@@ -213,6 +258,14 @@ class Player(pg.sprite.Sprite):
         self.delta_angle = m / 12
 
     def shoot(self, bullet_sprites, bullets, player):
+        """Creates new bullet and moves player.
+
+        Arguments:
+
+        bullet_sprites -- group of bullet sprites.
+
+        bullets -- array of bullets.
+        """
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = Bullet(self)
@@ -226,6 +279,16 @@ class Player(pg.sprite.Sprite):
             pass
 
     def get_shoot_delay(self, event, time_click_passed, mouse_up):
+        """Determines when to shoot.
+
+        Arguments:
+
+        event -- mouse event.
+
+        time_click_passed -- time that mouse is not pressed.
+
+        mouse_up -- parameter (1 if mouse is pressed, 0 if mouse is not pressed.
+        """
         if event.type == pg.MOUSEBUTTONUP and (event.button == 1):
             self.shoot_delay = 0
             mouse_up = 1
@@ -238,6 +301,8 @@ class Player(pg.sprite.Sprite):
         return mouse_up, time_click_passed
 
     def level_up(self):
+        """Updates parameters of player.
+        """
         score_func = 0.3562 * self.level ** 3 - 5.8423 * self.level ** 2 + 67.4898 * self.level - 60
         if (self.XP >= score_func) and (self.level < 45):
             self.level += 1
@@ -251,6 +316,8 @@ class Player(pg.sprite.Sprite):
                 self.skill_points += 1
 
     def health_regen_up(self):
+        """Upgrades player healt regen.
+        """
         if (self.regen_points < 7) and (self.skill_points > 0):
             regen_func = -0.0332 * self.regen_points ** 3 + 0.5029 * self.regen_points ** 2 \
                          - 0.1154 * self.regen_points + 3.12
@@ -259,6 +326,8 @@ class Player(pg.sprite.Sprite):
             self.skill_points -= 1
 
     def max_health_up(self):
+        """Upgrades player max health.
+        """
         if (self.max_HP_points < 7) and (self.skill_points > 0):
             self.max_HP += 20
             self.HP += 20
@@ -266,30 +335,40 @@ class Player(pg.sprite.Sprite):
             self.skill_points -= 1
 
     def body_damage_up(self):
+        """Upgrades player body damage
+        """
         if (self.BD_points < 7) and (self.skill_points > 0):
             self.BD += 3
             self.BD_points += 1
             self.skill_points -= 1
 
     def bullet_speed_up(self):
+        """Upgrades player bullet speed.
+        """
         if (self.bullet_speed_points < 7) and (self.skill_points > 0):
             self.bullet_speed += 0.5
             self.bullet_speed_points += 1
             self.skill_points -= 1
 
     def bullet_penetration_up(self):
+        """Upgrades player bullet penetration.
+        """
         if (self.bullet_penetration_points < 7) and (self.skill_points > 0):
             self.bullet_penetration += 3
             self.bullet_penetration_points += 1
             self.skill_points -= 1
 
     def bullet_damage_up(self):
+        """Upgrades player bullet damage.
+        """
         if (self.bullet_damage_points < 7) and (self.skill_points > 0):
             self.bullet_damage += 3
             self.bullet_damage_points += 1
             self.skill_points -= 1
 
     def reload_up(self):
+        """Upgrades player reload.
+        """
         if (self.reload_points < 7) and (self.skill_points > 0):
             if self.reload > 28:
                 self.reload -= 2
@@ -299,6 +378,8 @@ class Player(pg.sprite.Sprite):
             self.skill_points -= 1
 
     def speed_up(self):
+        """Upgrades player movement speed.
+        """
         if (self.speed_points < 7) and (self.skill_points > 0):
             self.impulse += 20
             self.speed = self.impulse / self.m
@@ -306,6 +387,8 @@ class Player(pg.sprite.Sprite):
             self.skill_points -= 1
 
     def regenerate(self):
+        """Increases HP of player.
+        """
         if self.HP < self.max_HP:
             self.regen_time += 1
         else:
@@ -314,6 +397,14 @@ class Player(pg.sprite.Sprite):
             self.HP += 1
 
     def render_food(self, arr_food, arr_food_to_render):
+        """Calculates food positions on screen
+
+        Arguments:
+
+        arr_food -- array of food.
+
+        arr_food_to_render -- array of food on screen.
+        """
         food_sprite_to_render = pg.sprite.Group()
         for food in arr_food:
             if (abs(food.pos.x - self.pos.x) <= 550) and (abs(food.pos.y - self.pos.y) <= 425):
@@ -327,6 +418,14 @@ class Player(pg.sprite.Sprite):
         return food_sprite_to_render
 
     def render_bot(self, arr_bot, arr_bot_to_render):
+        """Calculates bots positions on screen
+
+        Arguments:
+
+        arr_bot -- array of bots.
+
+        arr_bot_to_render -- array of bots on screen.
+        """
         bot_sprite_to_render = pg.sprite.Group()
         for bot in arr_bot:
             if (abs(bot.pos.x - self.pos.x) <= 500) and (abs(bot.pos.y - self.pos.y) <= 375):
@@ -345,7 +444,6 @@ class Bullet(pg.sprite.Sprite):
         pos = player.pos
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
-        # A reference to the original image to preserve the quality.
         self.orig_image = pg.image.load('Sprites/bullet_m.png')
         self.size = self.orig_image.get_size()
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.20), int(self.size[1] * 0.20)))
@@ -361,9 +459,13 @@ class Bullet(pg.sprite.Sprite):
         self.m = 3
         self.type = 'player'
 
-        self.speed = player.bullet_speed  # Не точно
-        self.penetration = player.bullet_penetration  # Не точно
-        self.damage = player.bullet_damage  # 7 HP
+        self.speed = player.bullet_speed
+        self.vx = 0
+        self.vy = 0
+        self.delta_vx = 0
+        self.delta_vy = 0
+        self.penetration = player.bullet_penetration
+        self.damage = player.bullet_damage
 
     def update(self, event, player):
         self.rotate()
@@ -372,12 +474,10 @@ class Bullet(pg.sprite.Sprite):
         self.damage -= 0.04
 
     def rotate(self):
-        """Rotate the image of the sprite around a pivot point."""
-        # Rotate the image.
+        """Rotate the image of the sprite around a pivot point.
+        """
         self.image = pg.transform.rotozoom(self.orig_image, 0.01, 1)
-        # Rotate the offset vector.
         offset_rotated = self.offset.rotate(0.01)
-        # Create a new rect with the center of the sprite + the offset.
         if (self.type == 'bot') and (self.penetration < 7):
             self.rect = self.image.get_rect(center=self.pos_render + self.shift + offset_rotated)
         else:
@@ -393,8 +493,10 @@ class Bullet(pg.sprite.Sprite):
 
     def move(self, player):
         self.shift = self.pos - player.pos
-        self.pos_render.x += self.speed * math.cos(self.angle)
-        self.pos_render.y += self.speed * math.sin(self.angle)
+        self.vx = self.speed * math.cos(self.angle) + self.delta_vx
+        self.vy = self.speed * math.sin(self.angle) + self.delta_vy
+        self.pos_render.x += self.vx
+        self.pos_render.y += self.vy
 
     def damage_food(self, food, bullets, arr_food, arr_food_to_render, player, bul):
         if bul.type == 'player':
@@ -402,7 +504,7 @@ class Bullet(pg.sprite.Sprite):
         else:
             player = 'bot'
         if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 + \
-                (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
+            (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(abs(self.damage), food.HP)
             food.HP -= min(abs(self.damage), food.HP)
             food.death(arr_food, player)
