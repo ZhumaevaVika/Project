@@ -49,6 +49,7 @@ class Player(pg.sprite.Sprite):
         self.impulse = 100
         self.speed = self.impulse / self.m
         self.r = 30
+        self.delta_angle = 0
 
         if player is None:
             self.level = 1
@@ -155,14 +156,14 @@ class Player(pg.sprite.Sprite):
             self.rotate()
         else:
             if event.pos[0] != self.pos_render.x:
-                self.angle = math.atan((event.pos[1] - self.pos_render.y) / (event.pos[0] - self.pos_render.x))
+                self.angle = math.atan((event.pos[1] - self.pos_render.y) / (event.pos[0] - self.pos_render.x)) + self.delta_angle
             elif event.pos[0] == self.pos_render.x:
-                self.angle = -80 * (event.pos[1] - self.pos_render.y) / abs(event.pos[1] - self.pos_render.y)
+                self.angle = -80 * (event.pos[1] - self.pos_render.y) / abs(event.pos[1] - self.pos_render.y) + self.delta_angle
             if event.pos[0] < self.pos_render.x:
                 self.angle += math.pi
             self.rotate()
         self.shoot_delay += 1
-
+        
         self.level_up()
         self.regenerate()
 
@@ -207,6 +208,8 @@ class Player(pg.sprite.Sprite):
             self.pos.x = 0
         if self.pos.y <= 0:
             self.pos.y = 0
+        m = self.vx * math.sin(self.angle) - self.vy * math.cos(self.angle)
+        self.delta_angle = m / 12
 
     def shoot(self, bullet_sprites, bullets):
         try:
@@ -436,8 +439,18 @@ class Twin(Player):
         self.len_gun = 35
         self.class_type = 'Twin'
         self.count = 0
-        self.reload = 18
-        self.bullet_damage = 6
+
+        self.regen = player.regen
+        self.max_HP = player.max_HP
+        self.HP = player.HP
+        self.BD = player.BD
+        self.bullet_speed = player.bullet_speed
+        self.bullet_penetration = player.bullet_penetration
+        self.bullet_damage = player.bullet_damage
+        self.reload = player.reload
+
+        self.reload = 36 - player.reload_points * 3
+        self.bullet_damage = player.bullet_damage
         self.bullet_speed = player.bullet_speed
 
         self.level = player.level
@@ -522,6 +535,15 @@ class Sniper(Player):
 
         self.class_type = 'Sniper'
 
+        self.regen = player.regen
+        self.max_HP = player.max_HP
+        self.HP = player.HP
+        self.BD = player.BD
+        self.bullet_speed = player.bullet_speed
+        self.bullet_penetration = player.bullet_penetration
+        self.bullet_damage = player.bullet_damage
+        self.reload = player.reload
+
         self.bullet_speed = 6
         self.reload = 48
 
@@ -557,6 +579,15 @@ class MachineGun(Player):
         self.len_gun = 35
 
         self.class_type = 'MachineGun'
+        
+        self.regen = player.regen
+        self.max_HP = player.max_HP
+        self.HP = player.HP
+        self.BD = player.BD
+        self.bullet_speed = player.bullet_speed
+        self.bullet_penetration = player.bullet_penetration
+        self.bullet_damage = player.bullet_damage
+        self.reload = player.reload
 
         self.reload = 18
         self.bullet_damage = 6.5
@@ -627,11 +658,18 @@ class FlankGuard(Player):
 
         self.class_type = 'FlankGuard'
 
+        self.regen = player.regen
+        self.max_HP = player.max_HP
+        self.HP = player.HP
+        self.BD = player.BD
+        self.bullet_speed = player.bullet_speed
+        self.bullet_penetration = player.bullet_penetration
+        self.bullet_damage = player.bullet_damage
+        self.reload = player.reload
+
         self.level = player.level
         self.XP = player.XP
         self.skill_points = player.skill_points
-        self.max_HP = player.max_HP
-        self.HP = player.HP
 
         self.regen_points = player.regen_points
         self.max_HP_points = player.max_HP_points
