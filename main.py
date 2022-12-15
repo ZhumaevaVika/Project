@@ -56,7 +56,7 @@ def main():
             elif event.type == pg.MOUSEBUTTONDOWN:
                 event_mousedown = event
                 player.upgrade_on_mouse(event_mousedown)
-                player, player_sprites, choose_class_menu_on = player.chose_class(event_mousedown, player,
+                player, player_sprites, choose_class_menu_on = player.choose_class(event_mousedown, player,
                                                                                   player_sprites, choose_class_menu_on)
             mouse_up, time_click_passed = player.get_shoot_delay(event, time_click_passed, mouse_up)
         if mouse_up:

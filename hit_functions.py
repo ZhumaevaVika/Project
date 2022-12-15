@@ -44,5 +44,26 @@ def bot_hit(arr_bot, player):
                 objects_hit(f1, f2)
 
 
+def food_bullet_hit(food, bullet, arr_food, arr_food_to_render, player):
+    f1 = food
+    f2 = bullet
+    xc = (f1.pos_render.x * f1.m + f2.pos_render.x * f2.m) / (f1.m + f2.m)
+    yc = (f1.pos_render.y * f1.m + f2.pos_render.y * f2.m) / (f1.m + f2.m)
+    k = (f1.r + f2.r) / ((f1.pos_render.x - f2.pos_render.x) ** 2 + (f1.pos_render.y - f2.pos_render.y) ** 2) ** 0.5
+    f1.pos_render.x = xc + (f1.pos_render.x - xc) * k
+    f1.pos_render.y = yc + (f1.pos_render.y - yc) * k
+    f2.pos_render.x = xc + (f2.pos_render.x - xc) * k
+    f2.pos_render.y = yc + (f2.pos_render.y - yc) * k
+    x = f2.pos_render.x - f1.pos_render.x
+    y = f2.pos_render.y - f1.pos_render.y
+    p = (2 / (f1.m + f2.m)) * ((f2.vx) * x + (f2.vy) * y) / (x**2 + y**2)
+    f2.delta_vx = p * f1.m * x
+    f2.delta_vy = p * f1.m * y
+    f1.death(arr_food, player)
+    f1.death(arr_food_to_render, player)
+
+
+
+
 if __name__ == "__main__":
     print("This module is not for direct call!")

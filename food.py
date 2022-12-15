@@ -34,8 +34,7 @@ class Food(pg.sprite.Sprite):
         self.has_not_health_bar = True
 
     def update(self):
-        """
-        Updates food parameters.
+        """Updates food parameters.
         """
         self.move()
         self.angle += self.rotate_speed
@@ -43,20 +42,15 @@ class Food(pg.sprite.Sprite):
         self.generate_hitbox()
 
     def rotate(self):
+        """Rotate the image of the sprite around a pivot point.
         """
-        Rotate the image of the sprite around a pivot point.
-        """
-        # Rotate the image.
         angle = self.angle * 180 / math.pi
         self.image = pg.transform.rotozoom(self.orig_image, -angle, 1)
-        # Rotate the offset vector.
         offset_rotated = self.offset.rotate(angle)
-        # Create a new rect with the center of the sprite + the offset.
         self.rect = self.image.get_rect(center=self.pos_render + offset_rotated)
 
     def move(self):
-        """
-        Moves food according to its speed, slows down food, if its speed is more than speed of generation.
+        """Moves food according to its speed, slows down food, if its speed is more than speed of generation.
         """
         speed = (self.vx ** 2 + self.vy ** 2) ** 0.5
         if speed > self.speed:
@@ -70,8 +64,13 @@ class Food(pg.sprite.Sprite):
             self.vy *= -1
 
     def death(self, arr_food, player):
-        """
-        Delete sprite of food, if it
+        """Delete sprite of food, if it was killed.
+
+        Arguments: 
+
+        arr_food -- array of food.
+
+        player.
         """
         if self.HP <= 0:
             self.kill()
@@ -84,6 +83,8 @@ class Food(pg.sprite.Sprite):
             generate_food(arr_food, 1)
 
     def generate_hitbox(self, r=0):
+        """generates positions of tops of hitbox on x and y.
+        """
         angle = self.angle + self.delta
         x = self.pos.x
         y = self.pos.y
@@ -168,6 +169,14 @@ class AlphaPentagon(Food):
 
 
 def generate_food(arr_food, n_max):
+    """Generates food on the screen.
+    
+    Arguments:
+    
+    arr_food -- array of food.
+    
+    n_max -- max number of food on the screen.
+    """
     variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]
     for i in range(n_max):
         food = choice(variants)
