@@ -60,7 +60,6 @@ class Player(pg.sprite.Sprite):
         self.XP = 0
         self.skill_points = 0
 
-
     def hit_food(self, arr_food, arr_food_to_render):
         """Hits and damages player and food on the screen.
 
