@@ -504,7 +504,7 @@ class Bullet(pg.sprite.Sprite):
         else:
             player = 'bot'
         if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 + \
-            (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
+                (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
             self.penetration -= min(abs(self.damage), food.HP)
             food.HP -= min(abs(self.damage), food.HP)
             food.death(arr_food, player)
