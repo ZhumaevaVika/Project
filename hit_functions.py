@@ -34,5 +34,15 @@ def food_hit(arr_food_to_render):
                 objects_hit(f1, f2)
 
 
+def bot_hit(arr_bot, player):
+    hit_arr = arr_bot + [player]
+    for i in range(len(hit_arr) - 1):
+        for j in range(i + 1, len(hit_arr)):
+            f1 = hit_arr[i]
+            f2 = hit_arr[j]
+            if ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) <= (f1.r + f2.r) ** 2:
+                objects_hit(f1, f2)
+
+
 if __name__ == "__main__":
     print("This module is not for direct call!")

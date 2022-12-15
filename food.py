@@ -77,7 +77,10 @@ class Food(pg.sprite.Sprite):
             self.kill()
             if self in arr_food:
                 arr_food.remove(self)
-            player.XP += self.XP
+                if player == 'bot':
+                    pass
+                else:
+                    player.XP += self.XP
             generate_food(arr_food, 1)
 
     def generate_hitbox(self, r=0):

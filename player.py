@@ -23,6 +23,7 @@ class Player(pg.sprite.Sprite):
         self.regen_time = 0
 
         self.class_type = 'Tank'
+        self.type = 'player'
 
         self.regen = 3.12  # 3.12% per second
         self.max_HP = 50
@@ -321,6 +322,19 @@ class Player(pg.sprite.Sprite):
                     arr_food_to_render.remove(food)
         return food_sprite_to_render
 
+    def render_bot(self, arr_bot, arr_bot_to_render):
+        bot_sprite_to_render = pg.sprite.Group()
+        for bot in arr_bot:
+            if (abs(bot.pos.x - self.pos.x) <= 500) and (abs(bot.pos.y - self.pos.y) <= 375):
+                bot.pos_render = Vector2(bot.pos.x - self.pos.x + 500, bot.pos.y - self.pos.y + 375)
+                bot_sprite_to_render.add(bot)
+                if bot not in arr_bot_to_render:
+                    arr_bot_to_render.append(bot)
+            else:
+                if bot in arr_bot_to_render:
+                    arr_bot_to_render.remove(bot)
+        return bot_sprite_to_render
+
 
 class Bullet(pg.sprite.Sprite):
     def __init__(self, player):
@@ -341,6 +355,7 @@ class Bullet(pg.sprite.Sprite):
         self.angle = 0
         self.r = 10
         self.m = 3
+        self.type = 'player'
 
         self.speed = player.bullet_speed  # Не точно
         self.penetration = player.bullet_penetration  # Не точно
@@ -359,7 +374,10 @@ class Bullet(pg.sprite.Sprite):
         # Rotate the offset vector.
         offset_rotated = self.offset.rotate(0.01)
         # Create a new rect with the center of the sprite + the offset.
-        self.rect = self.image.get_rect(center=self.pos_render + self.shift + offset_rotated)
+        if (self.type == 'bot') and (self.penetration < 7):
+            self.rect = self.image.get_rect(center=self.pos_render + self.shift + offset_rotated)
+        else:
+            self.rect = self.image.get_rect(center=self.pos_render + self.shift + offset_rotated)
 
     def angle_update(self, event):
         if event[0] != self.pos_render.x:
@@ -374,20 +392,38 @@ class Bullet(pg.sprite.Sprite):
         self.pos_render.x += self.speed * math.cos(self.angle)
         self.pos_render.y += self.speed * math.sin(self.angle)
 
-    def damage_food(self, food, bullets, arr_food, arr_food_to_render, player):
+    def damage_food(self, food, bullets, arr_food, arr_food_to_render, player, bul):
+        if bul.type == 'player':
+            player = player
+        else:
+            player = 'bot'
         if (self.pos_render.x + self.shift.x - food.pos_render.x) ** 2 + \
                 (self.pos_render.y + self.shift.y - food.pos_render.y) ** 2 <= (self.r + food.r) ** 2:
-            self.penetration -= min(self.damage, food.HP)
-            food.HP -= min(self.damage, food.HP)
+            self.penetration -= min(abs(self.damage), food.HP)
+            food.HP -= min(abs(self.damage), food.HP)
             food.death(arr_food, player)
             food.death(arr_food_to_render, player)
         if self in bullets:
             self.death(bullets)
 
+    def damage_player(self, player, bot, bullets, arr_bot):
+        if self.type == 'player':
+            player = bot
+            if self.penetration < 7:
+                if (self.pos_render.x + self.shift.x - player.pos_render.x) ** 2 + \
+                        (self.pos_render.y + self.shift.y - player.pos_render.y) ** 2 <= (self.r + player.r) ** 2:
+                    self.penetration -= min(abs(self.damage), player.HP)
+                    player.HP -= min(abs(self.damage), player.HP)
+                    flag = 1
+                    bot.death(arr_bot, player, flag)
+                if self in bullets:
+                    self.death(bullets)
+
     def death(self, bullets):
         if self.penetration <= 0:
             self.kill()
-            bullets.remove(self)
+            if self in bullets:
+                bullets.remove(self)
 
 
 class Twin(Player):
@@ -642,6 +678,7 @@ class FlankGuardBulletBack(Bullet):
 
 
 def generate_player(type, player):
+    player_sprites = None
     if type == 'Player':
         player = Player(player)
         player_sprites = pg.sprite.Group(player)
