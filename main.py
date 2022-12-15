@@ -9,15 +9,6 @@ from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_b
 from config import FPS, HEIGHT, WIDTH, LIGHT_GREY
 import copy
 
-# TODO Документация (Максим, Ваня)
-# TODO Презентация (Максим, Вика, Ваня)
-# TODO При наведении мыши показывать прокачку (Вика)
-# TODO Прокачка ботам
-
-# FIXME При смене класса сбрасывается прокачка, skill points остаются (Ваня)
-# FIXME player.XP каждый раз обнуляется (778 строка в player)
-# FIXME сделать урон игроку при столкновении с ботами
-
 
 def main():
     arr_food = []
@@ -89,7 +80,7 @@ def main():
         player_sprites.update(event_mouse, arr_bot)
         food_sprite_to_render = player.render_food(arr_food, arr_food_to_render)
         food_sprite_to_render.update()
-        bullet_sprites.update(event_mouse, player)
+        bullet_sprites.update(player)
         upgrade_bars_to_render = update_upgrade_bars(arr_upgrade_bars, player)
         screen.fill(LIGHT_GREY)
         choose_class_menu_on, choose_class_menu_on_flag = \
@@ -120,7 +111,7 @@ def main():
         food_hit(arr_food_to_render)
         food_sprite_to_render = player.render_food(arr_food, arr_food_to_render)
         food_sprite_to_render.update()
-        bullet_sprites.update(event_mouse, player)
+        bullet_sprites.update(player)
         bot_sprites_to_render.update(player, arr_bot)
         screen.fill(LIGHT_GREY)
 

@@ -259,7 +259,7 @@ def update_bot(self, player, arr_bot):
 def move_bot(self, player):
     x = 0
     y = 0
-    k = self.speed / 160
+    k = self.impulse / self.m / 160
     boost = 100 * k ** 2
     self.vx -= self.vx * k
     self.vy -= self.vy * k

@@ -6,6 +6,12 @@ from random import randint, randrange, choice
 
 class Food(pg.sprite.Sprite):
     def __init__(self, filename):
+        """Class Food constructor.
+        
+        Arguments:
+        
+        filename -- filename.
+        """
         super().__init__()
         pos = (randint(50, 9500), randint(50, 9500))
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
@@ -97,6 +103,8 @@ class Food(pg.sprite.Sprite):
 
 class Square(Food):
     def __init__(self):
+        """Subclass Sguare constructor.
+        """
         filename = 'Sprites/square.png'
         super().__init__(filename)
         self.HP = 10
@@ -115,6 +123,8 @@ class Square(Food):
 
 class Triangle(Food):
     def __init__(self):
+        """Subclass Triangle constructor.
+        """
         filename = 'Sprites/triangle.png'
         super().__init__(filename)
         self.HP = 30
@@ -133,6 +143,8 @@ class Triangle(Food):
 
 class Pentagon(Food):
     def __init__(self):
+        """Subclass Pentagon constructor.
+        """
         filename = 'Sprites/pentagon.png'
         super().__init__(filename)
         self.HP = 100
@@ -151,6 +163,8 @@ class Pentagon(Food):
 
 class AlphaPentagon(Food):
     def __init__(self):
+        """Subclass AlphaPentagon constructor.
+        """
         filename = 'Sprites/alpha_pentagon.png'
         super().__init__(filename)
         self.HP = 3000

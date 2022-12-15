@@ -5,8 +5,15 @@ from random import randint
 from hit_functions import in_polygon, objects_hit
 
 
+
 class Player(pg.sprite.Sprite):
     def __init__(self, player):
+        """Class Player constructor.
+
+        Arguments:
+
+        player -- Player.
+        """
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
         self.orig_image = pg.image.load('Sprites/tank.png')
@@ -20,7 +27,7 @@ class Player(pg.sprite.Sprite):
         self.len_gun = 35
         self.shoot_delay = 0
         self.regen_time = 0
-
+        
         self.class_type = 'Tank'
         self.type = 'player'
 
@@ -46,21 +53,13 @@ class Player(pg.sprite.Sprite):
         self.vy = 0
         self.m = 20
         self.impulse = 100
-        self.speed = self.impulse / self.m
         self.r = 30
         self.delta_angle = 0
 
-        if player is None:
-            self.level = 1
-            self.XP = 0
-            self.skill_points = 0
-        else:
-            self.pos = player.pos
-            self.level = player.level
-            self.XP = player.XP
-            self.skill_points = player.skill_points
-            self.max_HP = player.max_HP
-            self.HP = player.HP
+        self.level = 1
+        self.XP = 0
+        self.skill_points = 0
+
 
     def hit_food(self, arr_food, arr_food_to_render):
         """Hits and damages player and food on the screen.
@@ -188,7 +187,8 @@ class Player(pg.sprite.Sprite):
 
         Arguments:
 
-        event -- event of mouse."""
+        event -- event of mouse.
+        """
         if event == (0, 0):
             self.angle = 0
             self.rotate()
@@ -224,7 +224,7 @@ class Player(pg.sprite.Sprite):
         """
         x = 0
         y = 0
-        k = self.speed / 160
+        k = self.impulse / self.m / 160
         boost = 100 * k ** 2
         self.vx -= self.vx * k
         self.vy -= self.vy * k
@@ -380,7 +380,6 @@ class Player(pg.sprite.Sprite):
         """
         if (self.speed_points < 7) and (self.skill_points > 0):
             self.impulse += 20
-            self.speed = self.impulse / self.m
             self.speed_points += 1
             self.skill_points -= 1
 
@@ -395,8 +394,8 @@ class Player(pg.sprite.Sprite):
             self.HP += 1
 
     def render_food(self, arr_food, arr_food_to_render):
-        """Calculates food positions on screen
-
+        """Calculates food positions on screen.
+        
         Arguments:
 
         arr_food -- array of food.
@@ -416,7 +415,7 @@ class Player(pg.sprite.Sprite):
         return food_sprite_to_render
 
     def render_bot(self, arr_bot, arr_bot_to_render):
-        """Calculates bots positions on screen
+        """Calculates bots positions on screen.
 
         Arguments:
 
@@ -438,6 +437,8 @@ class Player(pg.sprite.Sprite):
 
 
 class Bullet(pg.sprite.Sprite):
+    """Class Bullet constructor.
+    """
     def __init__(self, player):
         pos = player.pos
         super().__init__()
@@ -460,12 +461,16 @@ class Bullet(pg.sprite.Sprite):
         self.speed = player.bullet_speed
         self.vx = 0
         self.vy = 0
-        self.delta_vx = 0
-        self.delta_vy = 0
         self.penetration = player.bullet_penetration
         self.damage = player.bullet_damage
 
-    def update(self, event, player):
+    def update(self, player):
+        """Moves bullet and updates parameters.
+
+        Arguments:
+
+        event -- event of mouse.
+        """
         self.rotate()
         self.move(player)
         self.penetration -= 0.04
@@ -482,6 +487,12 @@ class Bullet(pg.sprite.Sprite):
             self.rect = self.image.get_rect(center=self.pos_render + self.shift + offset_rotated)
 
     def angle_update(self, event):
+        """Updates angle of bullet.
+
+        Arguments:
+
+        event -- mouse event.
+        """
         if event[0] != self.pos_render.x:
             self.angle = math.atan((event[1] - self.pos_render.y) / (event[0] - self.pos_render.x))
         elif event[0] == self.pos_render.x:
@@ -490,13 +501,35 @@ class Bullet(pg.sprite.Sprite):
             self.angle += math.pi
 
     def move(self, player):
+        """Moves bullet.
+        
+        Arguments:
+        
+        player -- Player.
+        """
         self.shift = self.pos - player.pos
-        self.vx = self.speed * math.cos(self.angle) + self.delta_vx
-        self.vy = self.speed * math.sin(self.angle) + self.delta_vy
+        self.vx = self.speed * math.cos(self.angle)
+        self.vy = self.speed * math.sin(self.angle)
         self.pos_render.x += self.vx
         self.pos_render.y += self.vy
 
     def damage_food(self, food, bullets, arr_food, arr_food_to_render, player, bul):
+        """Damages food by bullet.
+
+        Arguments:
+
+        food -- food.
+
+        bullets -- array of bullets.
+
+        arr_food -- array of food.
+
+        arr_food_to_render -- array of food on the screen.
+
+        player -- Player.
+
+        bul -- bullet.
+        """
         if bul.type == 'player':
             player = player
         else:
@@ -511,6 +544,18 @@ class Bullet(pg.sprite.Sprite):
             self.death(bullets)
 
     def damage_player(self, player, bot, bullets, arr_bot, arr_bot_to_render):
+        """Bullet damages bot.
+        
+        Arguments:
+        
+        player -- Player.
+        
+        bot -- bot.
+        
+        bullets -- array of bullets.
+        
+        arr_bot -- array of bullets.
+        """
         if self.type == 'player':
             player = bot
             if (self.pos_render.x + self.shift.x - player.pos_render.x) ** 2 + \
@@ -524,6 +569,12 @@ class Bullet(pg.sprite.Sprite):
                 self.death(bullets)
 
     def death(self, bullets):
+        """Deletes bullets from array.
+        
+        Arguments:
+
+        bullets -- array of bullets.
+        """
         if self.penetration <= 0:
             self.kill()
             if self in bullets:
@@ -532,44 +583,31 @@ class Bullet(pg.sprite.Sprite):
 
 class Twin(Player):
     def __init__(self, player):
+        """Twin subclass consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
-        self.pos = player.pos
         self.orig_image = pg.image.load('Sprites/twin.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.offset = Vector2(9, 1)
-        self.len_gun = 35
         self.class_type = 'Twin'
         self.count = 0
+        inheritance(self, player)
+        self.reload = self.reload / 2
+        self.bullet_damage = self.bullet_damage - 1
 
-        self.regen = player.regen
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-        self.BD = player.BD
-        self.bullet_speed = player.bullet_speed
-        self.bullet_penetration = player.bullet_penetration
-        self.bullet_damage = player.bullet_damage
-        self.reload = player.reload
-
-        self.reload = 36 - player.reload_points * 3
-        self.bullet_damage = player.bullet_damage
-        self.bullet_speed = player.bullet_speed
-
-        self.level = player.level
-        self.XP = player.XP
-        self.skill_points = player.skill_points
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-
-        self.regen_points = player.regen_points
-        self.max_HP_points = player.max_HP_points
-        self.BD_points = player.BD_points
-        self.bullet_speed_points = player.bullet_speed_points
-        self.bullet_penetration_points = player.bullet_penetration_points
-        self.bullet_damage_points = player.bullet_damage_points
-        self.reload_points = player.reload_points
-        self.speed_points = player.speed_points
-
-    def shoot(self, bullet_sprites, bullets, player):
+    def shoot(self, bullet_sprites, bullets):
+        """Creates new bullet and moves player.
+        
+        Arguments:
+        
+        bullet_sprites -- group of bullets sprites.
+        
+        bullets -- array of bullets.
+        """
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = TwinBullet(self)
@@ -584,12 +622,16 @@ class Twin(Player):
             pass
 
     def reload_up(self):
+        """Upgrades player reload.
+        """
         if (self.reload_points < 7) and (self.skill_points > 0):
             self.reload -= 1
             self.reload_points += 1
             self.skill_points -= 1
 
     def bullet_damage_up(self):
+        """Upgrades player bullet damage.
+        """
         if (self.bullet_damage_points < 7) and (self.skill_points > 0):
             self.bullet_damage += 2.5
             self.bullet_damage_points += 1
@@ -598,6 +640,12 @@ class Twin(Player):
 
 class TwinBullet(Bullet):
     def __init__(self, player):
+        """TwinBullet subclass consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
         self.offset1 = Vector2(
             self.len * math.cos(player.angle) - 12 * math.sin(player.angle),
@@ -609,61 +657,27 @@ class TwinBullet(Bullet):
             self.offset = self.offset1
         if player.count % 2 == 1:
             self.offset = self.offset2
-        self.level = player.level
-        self.XP = player.XP
-        self.skill_points = player.skill_points
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-
-        self.regen_points = player.regen_points
-        self.max_HP_points = player.max_HP_points
-        self.BD_points = player.BD_points
-        self.bullet_speed_points = player.bullet_speed_points
-        self.bullet_penetration_points = player.bullet_penetration_points
-        self.bullet_damage_points = player.bullet_damage_points
-        self.reload_points = player.reload_points
-        self.speed_points = player.speed_points
 
 
 class Sniper(Player):
     def __init__(self, player):
+        """Sniper class consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
-        self.pos = player.pos
         self.orig_image = pg.image.load('Sprites/sniper.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.4), int(self.size[1] * 0.36)))
         self.offset = Vector2(13, 1)
-        self.len_gun = 35
-
         self.class_type = 'Sniper'
-
-        self.regen = player.regen
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-        self.BD = player.BD
-        self.bullet_speed = player.bullet_speed
-        self.bullet_penetration = player.bullet_penetration
-        self.bullet_damage = player.bullet_damage
-        self.reload = player.reload
-
-        self.bullet_speed = 6
-        self.reload = 48
-
-        self.level = player.level
-        self.XP = player.XP
-        self.skill_points = player.skill_points
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-
-        self.regen_points = player.regen_points
-        self.max_HP_points = player.max_HP_points
-        self.BD_points = player.BD_points
-        self.bullet_speed_points = player.bullet_speed_points
-        self.bullet_penetration_points = player.bullet_penetration_points
-        self.bullet_damage_points = player.bullet_damage_points
-        self.reload_points = player.reload_points
-        self.speed_points = player.speed_points
-
+        inheritance(self, player)
+        self.bullet_speed = self.bullet_speed * 1.5
+        self.reload = self.reload * 1.5
     def bullet_speed_up(self):
+        """Upgrades player bullet speed.
+        """
         if (self.bullet_speed_points < 7) and (self.skill_points > 0):
             self.bullet_speed += 0.65
             self.bullet_speed_points += 1
@@ -672,43 +686,29 @@ class Sniper(Player):
 
 class MachineGun(Player):
     def __init__(self, player):
+        """MachineGun class consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
-        self.pos = player.pos
         self.orig_image = pg.image.load('Sprites/machine_gun.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.offset = Vector2(9, 1)
-        self.len_gun = 35
+        self.class_type = 'MachineGun'        
+        inheritance(self, player)
+        self.reload = self.reload / 2
 
-        self.class_type = 'MachineGun'
-
-        self.regen = player.regen
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-        self.BD = player.BD
-        self.bullet_speed = player.bullet_speed
-        self.bullet_penetration = player.bullet_penetration
-        self.bullet_damage = player.bullet_damage
-        self.reload = player.reload
-
-        self.reload = 18
-        self.bullet_damage = 6.5
-
-        self.level = player.level
-        self.XP = player.XP
-        self.skill_points = player.skill_points
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-
-        self.regen_points = player.regen_points
-        self.max_HP_points = player.max_HP_points
-        self.BD_points = player.BD_points
-        self.bullet_speed_points = player.bullet_speed_points
-        self.bullet_penetration_points = player.bullet_penetration_points
-        self.bullet_damage_points = player.bullet_damage_points
-        self.reload_points = player.reload_points
-        self.speed_points = player.speed_points
-
-    def shoot(self, bullet_sprites, bullets, player):
+    def shoot(self, bullet_sprites, bullets):
+        """Creates new bullet and moves player.
+        
+        Arguments:
+        
+        bullet_sprites -- group of bullets sprites.
+        
+        bullets -- array of bullets.
+        """
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = MachineGunBullet(self)
@@ -722,12 +722,16 @@ class MachineGun(Player):
             pass
 
     def reload_up(self):
+        """Upgrades player reload.
+        """
         if (self.reload_points < 7) and (self.skill_points > 0):
             self.reload -= 1
             self.reload_points += 1
             self.skill_points -= 1
 
     def bullet_damage_up(self):
+        """Upgrades player bullet damage.
+        """
         if (self.bullet_damage_points < 7) and (self.skill_points > 0):
             self.bullet_damage += 2.75
             self.bullet_damage_points += 1
@@ -736,9 +740,21 @@ class MachineGun(Player):
 
 class MachineGunBullet(Bullet):
     def __init__(self, player):
+        """MachineGunBullet subclass consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
 
     def angle_update(self, event):
+        """Updates angle of bullet.
+
+        Arguments:
+
+        event -- mouse event.
+        """
         if event[0] != self.pos_render.x:
             self.angle = math.atan((event[1] - self.pos_render.y) / (event[0] - self.pos_render.x))
         elif event[0] == self.pos_render.x:
@@ -750,38 +766,27 @@ class MachineGunBullet(Bullet):
 
 class FlankGuard(Player):
     def __init__(self, player):
+        """MachineGun class consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
-        self.pos = player.pos
         self.orig_image = pg.image.load('Sprites/flank_guard.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.44), int(self.size[1] * 0.36)))
         self.offset = Vector2(4, 1)
-        self.len_gun = 35
-
         self.class_type = 'FlankGuard'
-
-        self.regen = player.regen
-        self.max_HP = player.max_HP
-        self.HP = player.HP
-        self.BD = player.BD
-        self.bullet_speed = player.bullet_speed
-        self.bullet_penetration = player.bullet_penetration
-        self.bullet_damage = player.bullet_damage
-        self.reload = player.reload
-
-        self.level = player.level
-        self.XP = player.XP
-        self.skill_points = player.skill_points
-
-        self.regen_points = player.regen_points
-        self.max_HP_points = player.max_HP_points
-        self.BD_points = player.BD_points
-        self.bullet_speed_points = player.bullet_speed_points
-        self.bullet_penetration_points = player.bullet_penetration_points
-        self.bullet_damage_points = player.bullet_damage_points
-        self.reload_points = player.reload_points
-        self.speed_points = player.speed_points
-
-    def shoot(self, bullet_sprites, bullets, player):
+        inheritance(self, player)
+    def shoot(self, bullet_sprites, bullets):
+        """Creates new bullet and moves player.
+        
+        Arguments:
+        
+        bullet_sprites -- group of bullets sprites.
+        
+        bullets -- array of bullets.
+        """
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet_front = FlankGuardBulletFront(self)
@@ -799,6 +804,12 @@ class FlankGuard(Player):
 
 class FlankGuardBulletFront(Bullet):
     def __init__(self, player):
+        """FlankGuardBulletFront subclass consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
         self.offset = Vector2(self.len * math.cos(player.angle),
                               self.len * math.sin(player.angle))
@@ -806,34 +817,93 @@ class FlankGuardBulletFront(Bullet):
 
 class FlankGuardBulletBack(Bullet):
     def __init__(self, player):
+        """FlankGuardBulletBack subclass consctructor.
+
+        Arguments:
+
+        player -- PLayer.
+        """
         super().__init__(player)
         self.offset = Vector2(self.len * -math.cos(player.angle),
                               self.len * -math.sin(player.angle))
 
     def move(self, player):
+        """Moves bullet.
+        
+        Arguments:
+        
+        player -- Player.
+        """
         self.shift = self.pos - player.pos
         self.pos_render.x += self.speed * -math.cos(self.angle)
         self.pos_render.y += self.speed * -math.sin(self.angle)
 
 
-def generate_player(types, player):
+def generate_player(type, player):
+    """Generates player.
+    
+    Arguments:
+    
+    type -- subclass type.
+    
+    player -- Player.
+    """
     player_sprites = None
-    if types == 'Player':
+    if type == 'Player':
         player = Player(player)
         player_sprites = pg.sprite.Group(player)
-    if types == 'Twin':
+    if type == 'Twin':
         player = Twin(player)
         player_sprites = pg.sprite.Group(player)
-    if types == 'Sniper':
+    if type == 'Sniper':
         player = Sniper(player)
         player_sprites = pg.sprite.Group(player)
-    if types == 'MachineGun':
+    if type == 'MachineGun':
         player = MachineGun(player)
         player_sprites = pg.sprite.Group(player)
-    if types == 'FlankGuard':
+    if type == 'FlankGuard':
         player = FlankGuard(player)
         player_sprites = pg.sprite.Group(player)
     return player, player_sprites
+
+def inheritance(self, player):
+    """Assignments parameters of player to subclass.
+
+    Arguments:
+
+    self -- subclass.
+
+    player -- Player.
+    """
+    self.regen_points = player.regen_points
+    self.max_HP_points = player.max_HP_points
+    self.BD_points = player.BD_points
+    self.bullet_speed_points = player.bullet_speed_points
+    self.bullet_penetration_points = player.bullet_penetration_points
+    self.bullet_damage_points = player.bullet_damage_points
+    self.reload_points = player.reload_points
+    self.speed_points = player.speed_points
+
+    self.regen = player.regen
+    self.max_HP = player.max_HP
+    self.HP = player.HP
+    self.BD = player.BD
+    self.bullet_speed = player.bullet_speed
+    self.bullet_penetration = player.bullet_penetration
+    self.bullet_damage = player.bullet_damage
+    self.reload = player.reload
+
+    self.pos = player.pos
+    self.impulse = player.impulse
+    self.m = player.m
+    self.len_gun = player.len_gun
+    self.level = player.level
+    self.XP = player.XP
+    self.skill_points = player.skill_points
+    self.vx = player.vx
+    self.vy = player.vy
+    self.r = player.r
+    self.delta_angle = player.delta_angle
 
 
 if __name__ == "__main__":
