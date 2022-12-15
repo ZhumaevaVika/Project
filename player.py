@@ -412,15 +412,14 @@ class Bullet(pg.sprite.Sprite):
     def damage_player(self, player, bot, bullets, arr_bot):
         if self.type == 'player':
             player = bot
-            if self.penetration < 7:
-                if (self.pos_render.x + self.shift.x - player.pos_render.x) ** 2 + \
-                        (self.pos_render.y + self.shift.y - player.pos_render.y) ** 2 <= (self.r + player.r) ** 2:
-                    self.penetration -= min(abs(self.damage), player.HP)
-                    player.HP -= min(abs(self.damage), player.HP)
-                    flag = 1
-                    bot.death(arr_bot, player, flag)
-                if self in bullets:
-                    self.death(bullets)
+            if (self.pos_render.x + self.shift.x - player.pos_render.x) ** 2 + \
+                    (self.pos_render.y + self.shift.y - player.pos_render.y) ** 2 <= (self.r + player.r) ** 2:
+                self.penetration -= min(abs(self.damage), player.HP)
+                player.HP -= min(abs(self.damage), player.HP)
+                flag = 1
+                bot.death(arr_bot, player, flag)
+            if self in bullets:
+                self.death(bullets)
 
     def death(self, bullets):
         if self.penetration <= 0:
