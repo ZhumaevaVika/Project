@@ -9,14 +9,13 @@ class Player(pg.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
-        # A reference to the original image to preserve the quality.
         self.orig_image = pg.image.load('Sprites/tank.png')
         self.size = self.orig_image.get_size()
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.rect = self.orig_image.get_rect()
         self.pos_render = Vector2(500, 375)
         self.pos = Vector2(randint(50, 9500), randint(50, 9500))
-        self.offset = Vector2(9, 1)  # We shift the sprite 50 px to the right.
+        self.offset = Vector2(9, 1)
         self.angle = 0
         self.len_gun = 35
         self.shoot_delay = 0
@@ -144,26 +143,28 @@ class Player(pg.sprite.Sprite):
                 choose_class_menu_on = False
         return player, player_sprites, choose_class_menu_on
 
-    def death(self):
+    def death(self, arr_bot, player, flag=0):
         if self.HP <= 0:
             self.kill()
             return False
         return True
 
-    def update(self, event):
+    def update(self, event, arr_bot):
         if event == (0, 0):
             self.angle = 0
             self.rotate()
         else:
             if event.pos[0] != self.pos_render.x:
-                self.angle = math.atan((event.pos[1] - self.pos_render.y) / (event.pos[0] - self.pos_render.x)) + self.delta_angle
+                self.angle = math.atan((event.pos[1] - self.pos_render.y) /
+                                       (event.pos[0] - self.pos_render.x)) + self.delta_angle
             elif event.pos[0] == self.pos_render.x:
-                self.angle = -80 * (event.pos[1] - self.pos_render.y) / abs(event.pos[1] - self.pos_render.y) + self.delta_angle
+                self.angle = -80 * (event.pos[1] - self.pos_render.y) / \
+                             abs(event.pos[1] - self.pos_render.y) + self.delta_angle
             if event.pos[0] < self.pos_render.x:
                 self.angle += math.pi
             self.rotate()
         self.shoot_delay += 1
-        
+
         self.level_up()
         self.regenerate()
 
@@ -211,7 +212,7 @@ class Player(pg.sprite.Sprite):
         m = self.vx * math.sin(self.angle) - self.vy * math.cos(self.angle)
         self.delta_angle = m / 12
 
-    def shoot(self, bullet_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets, player):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = Bullet(self)
@@ -467,7 +468,7 @@ class Twin(Player):
         self.reload_points = player.reload_points
         self.speed_points = player.speed_points
 
-    def shoot(self, bullet_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets, player):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = TwinBullet(self)
@@ -578,7 +579,7 @@ class MachineGun(Player):
         self.len_gun = 35
 
         self.class_type = 'MachineGun'
-        
+
         self.regen = player.regen
         self.max_HP = player.max_HP
         self.HP = player.HP
@@ -606,7 +607,7 @@ class MachineGun(Player):
         self.reload_points = player.reload_points
         self.speed_points = player.speed_points
 
-    def shoot(self, bullet_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets, player):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet = MachineGunBullet(self)
@@ -679,7 +680,7 @@ class FlankGuard(Player):
         self.reload_points = player.reload_points
         self.speed_points = player.speed_points
 
-    def shoot(self, bullet_sprites, bullets):
+    def shoot(self, bullet_sprites, bullets, player):
         try:
             if self.shoot_delay % self.reload == 0:
                 bullet_front = FlankGuardBulletFront(self)
@@ -714,21 +715,21 @@ class FlankGuardBulletBack(Bullet):
         self.pos_render.y += self.speed * -math.sin(self.angle)
 
 
-def generate_player(type, player):
+def generate_player(types, player):
     player_sprites = None
-    if type == 'Player':
+    if types == 'Player':
         player = Player(player)
         player_sprites = pg.sprite.Group(player)
-    if type == 'Twin':
+    if types == 'Twin':
         player = Twin(player)
         player_sprites = pg.sprite.Group(player)
-    if type == 'Sniper':
+    if types == 'Sniper':
         player = Sniper(player)
         player_sprites = pg.sprite.Group(player)
-    if type == 'MachineGun':
+    if types == 'MachineGun':
         player = MachineGun(player)
         player_sprites = pg.sprite.Group(player)
-    if type == 'FlankGuard':
+    if types == 'FlankGuard':
         player = FlankGuard(player)
         player_sprites = pg.sprite.Group(player)
     return player, player_sprites

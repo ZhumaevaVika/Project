@@ -8,13 +8,10 @@ from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_b
 from config import FPS, HEIGHT, WIDTH, LIGHT_GREY
 import copy
 
-# TODO Добавить ботов (для начала с простым интеллектом,
-#  по типу рандомный спавн со случайным уровнем и прокачкой, едут за игроком и стреляют в него) (Вика)
 # TODO Документация (Максим, Ваня)
 # TODO Презентация (Максим, Вика, Ваня)
 # TODO При наведении мыши показывать прокачку (Вика)
-# TODO Отскок пуль от еды (Ваня)
-
+# TODO Прокачка ботам
 
 # FIXME При смене класса сбрасывается прокачка, skill points остаются (Ваня)
 # FIXME player.XP каждый раз обнуляется (778 строка в player)
@@ -25,6 +22,7 @@ def main():
     arr_food = []
     arr_food_to_render = []
     arr_bot_to_render = []
+    bot_sprites_to_render = pg.sprite.Group()
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
     player = None
@@ -63,7 +61,7 @@ def main():
             time_click_passed += 1
 
         if pg.mouse.get_pressed()[0]:
-            player.shoot(bullet_sprites, bullets)
+            player.shoot(bullet_sprites, bullets, player)
 
         bot_sprites_to_render = player.render_bot(arr_bot, arr_bot_to_render)
         for bot in arr_bot:
@@ -81,11 +79,11 @@ def main():
                 for bot in arr_bot:
                     bul.damage_player(player, bot, bullets, arr_bot)
 
-        alive = player.death()
+        alive = player.death(arr_bot, player)
         player.hit_food(arr_food, arr_food_to_render)
         food_hit(arr_food_to_render)
         bot_hit(arr_bot, player)
-        player_sprites.update(event_mouse)
+        player_sprites.update(event_mouse, arr_bot)
         food_sprite_to_render = player.render_food(arr_food, arr_food_to_render)
         food_sprite_to_render.update()
         bullet_sprites.update(event_mouse, player)

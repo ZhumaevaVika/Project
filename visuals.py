@@ -23,13 +23,13 @@ class PlayerClassSprite(pygame.sprite.Sprite):
         self.image = pygame.Surface((75, 75))
         self.image.set_colorkey((0, 0, 0))
         if class_type == 'Twin':
-            self.orig_image = pygame.image.load('Sprites/twin_upgrade.jpg').convert()
+            self.orig_image = pygame.image.load('Sprites/twin_upgrade.png').convert()
         elif class_type == 'Sniper':
-            self.orig_image = pygame.image.load('Sprites/sniper_upgrade.jpg').convert()
+            self.orig_image = pygame.image.load('Sprites/sniper_upgrade.png').convert()
         elif class_type == 'MachineGun':
-            self.orig_image = pygame.image.load('Sprites/machinegun_upgrade.jpg').convert()
+            self.orig_image = pygame.image.load('Sprites/machine_gun_upgrade.png').convert()
         else:
-            self.orig_image = pygame.image.load('Sprites/flankguard_upgrade.jpg').convert()
+            self.orig_image = pygame.image.load('Sprites/flank_guard_upgrade.png').convert()
         self.image.blit(self.orig_image, (0, 0), (0, 0, 75, 75))
         self.rect = self.image.get_rect()
         self.rect.x = self.pos.x
