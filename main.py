@@ -4,7 +4,8 @@ from bots import generate_bot
 from food import generate_food
 from hit_functions import food_hit, bot_hit
 from visuals import draw_bottom_interface, create_upgrade_bars, update_upgrade_bars, draw_health_bars_for_food, \
-    draw_background, create_class_sprites, draw_choose_class_menu, draw_die_screen, choose_class_menu_launcher
+    draw_background, create_class_sprites, draw_choose_class_menu, draw_die_screen, choose_class_menu_launcher, \
+    draw_health_bars_for_bots, check_mouse_for_upgrade_bars
 from config import FPS, HEIGHT, WIDTH, LIGHT_GREY
 import copy
 
@@ -34,6 +35,7 @@ def main():
     start_point = copy.copy(player.pos)
     class_sprites_to_render = create_class_sprites()
 
+    upgrade_bars_flag = 0
     choose_class_menu_on = False
     choose_class_menu_on_flag = 0
     event_mouse = (0, 0)
@@ -48,6 +50,7 @@ def main():
                 return
             elif event.type == pg.MOUSEMOTION:
                 event_mouse = event
+                upgrade_bars_flag = check_mouse_for_upgrade_bars(event_mouse, upgrade_bars_flag, player, HEIGHT)
             elif event.type == pg.KEYDOWN:
                 event_keydown = event
                 player.upgrade_on_key(event_keydown)
@@ -63,7 +66,7 @@ def main():
         if pg.mouse.get_pressed()[0]:
             player.shoot(bullet_sprites, bullets, player)
 
-        bot_sprites_to_render = player.render_bot(arr_bot, arr_bot_to_render)
+        bot_sprites_to_render, arr_bot_to_render = player.render_bot(arr_bot, arr_bot_to_render)
         for bot in arr_bot:
             if abs(bot.pos.x - player.pos.x) < 700 and abs(bot.pos.y - player.pos.y) < 700:
                 bot.update(player, arr_bot)
@@ -77,7 +80,7 @@ def main():
                     bul.damage_food(food, bullets, arr_food, arr_food_to_render, player, bul)
             for bul in bullets:
                 for bot in arr_bot:
-                    bul.damage_player(player, bot, bullets, arr_bot)
+                    bul.damage_player(player, bot, bullets, arr_bot, arr_bot_to_render)
 
         alive = player.death(arr_bot, player)
         player.hit_food(arr_food, arr_food_to_render)
@@ -97,7 +100,9 @@ def main():
         player_sprites.draw(screen)
         food_sprite_to_render.draw(screen)
         draw_health_bars_for_food(screen, arr_food_to_render)
-        draw_bottom_interface(player, WIDTH, HEIGHT, screen, 50000, upgrade_bars_to_render)
+        draw_health_bars_for_bots(screen, arr_bot_to_render)
+        upgrade_bars_flag = draw_bottom_interface(player, WIDTH, HEIGHT, screen, 50000, upgrade_bars_to_render,
+                                                  upgrade_bars_flag)
         draw_choose_class_menu(screen, class_sprites_to_render, choose_class_menu_on)
         pg.display.flip()
         clock.tick(FPS)
@@ -124,6 +129,7 @@ def main():
         bot_sprites_to_render.draw(screen)
         food_sprite_to_render.draw(screen)
         draw_health_bars_for_food(screen, arr_food_to_render)
+        draw_health_bars_for_bots(screen, arr_bot_to_render)
         draw_die_screen(screen, player.XP, player.level)
         pg.display.flip()
         clock.tick(FPS)

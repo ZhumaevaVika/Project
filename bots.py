@@ -34,7 +34,7 @@ class BotTwinBullet(TwinBullet):
     def angle_update(self, player):
         angle_update_bot_bullet(self, player)
 
-    def damage_player(self, player, bot, bullets, arr_bot):
+    def damage_player(self, player, bot, bullets, arr_bot, arr_bot_to_render):
         damage_player_bot_bullet(self, player, bullets)
 
 
@@ -66,7 +66,7 @@ class BotSniperBullet(Bullet):
     def angle_update(self, player):
         angle_update_bot_bullet(self, player)
 
-    def damage_player(self, player, bot, bullets, arr_bot):
+    def damage_player(self, player, bot, bullets, arr_bot, arr_bot_to_render):
         damage_player_bot_bullet(self, player, bullets)
 
 
@@ -98,7 +98,7 @@ class BotMachineGunBullet(MachineGunBullet):
     def angle_update(self, player):
         angle_update_bot_bullet(self, player)
 
-    def damage_player(self, player, bot, bullets, arr_bot):
+    def damage_player(self, player, bot, bullets, arr_bot, arr_bot_to_render):
         damage_player_bot_bullet(self, player, bullets)
 
 
@@ -130,7 +130,7 @@ class BotFlankGuardBulletFront(FlankGuardBulletFront):
     def angle_update(self, player):
         angle_update_bot_bullet(self, player)
 
-    def damage_player(self, player, bot, bullets, arr_bot):
+    def damage_player(self, player, bot, bullets, arr_bot, arr_bot_to_render):
         damage_player_bot_bullet(self, player, bullets)
 
 
@@ -143,7 +143,7 @@ class BotFlankGuardBulletBack(FlankGuardBulletBack):
     def angle_update(self, player):
         angle_update_bot_bullet(self, player)
 
-    def damage_player(self, player, bot, bullets, arr_bot):
+    def damage_player(self, player, bot, bullets, arr_bot, arr_bot_to_render):
         damage_player_bot_bullet(self, player, bullets)
 
 

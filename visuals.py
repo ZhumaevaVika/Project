@@ -240,13 +240,20 @@ def update_upgrade_bars(upgrade_bar_list, player):
     return bars_to_render
 
 
+def check_mouse_for_upgrade_bars(event, upgrade_bars_flag, player, height):
+    if (upgrade_bars_flag == 0) and (0 <= event.pos[0] <= 170) and (height - 200 <= event.pos[1] <= height) and \
+            (player.skill_points == 0):
+        upgrade_bars_flag = 50
+    return upgrade_bars_flag
+
+
 def get_health_bar(arr_food_to_render):
     for food in arr_food_to_render:
         if food.has_not_health_bar:
             pass
 
 
-def draw_bottom_interface(player, width, height, screen, top_score, bars_to_render):
+def draw_bottom_interface(player, width, height, screen, top_score, bars_to_render, upgrade_bars_flag):
     # yellow level bar
     score_func = 0.3562 * player.level ** 3 - 5.8423 * player.level ** 2 + 67.4898 * player.level - 60
     if player.level != 1:
@@ -266,16 +273,27 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
                            "Score: " + str(player.XP))
     # Name
     draw_text(screen, Vector2(width // 2, height - 60), 20, "Name")  # FIXME поменять имя игрока
-    # upgrade bar
-    if player.skill_points > 0:
+    # upgrade bars
+    if (player.skill_points > 0) or (upgrade_bars_flag > 0):
         bars_to_render.draw(screen)
-        draw_text(screen, Vector2(180, height - 160), 20, 'x' + str(player.skill_points))
+        if player.skill_points > 0:
+            draw_text(screen, Vector2(180, height - 160), 20, 'x' + str(player.skill_points))
+        if upgrade_bars_flag > 0:
+            upgrade_bars_flag = upgrade_bars_flag - 1
     # player health bar
     if player.HP < player.max_HP:
         if player.HP >= 0:
             draw_bar(screen, Vector2(width // 2, height // 2 + 30), 50, 8, ANOTHER_GREEN, player.HP, player.max_HP)
         else:
             draw_bar(screen, Vector2(width // 2, height // 2 + 30), 50, 8, ANOTHER_GREEN, 0, player.max_HP)
+    return upgrade_bars_flag
+
+
+def draw_health_bars_for_bots(screen, arr_bot_to_render):
+    for bot in arr_bot_to_render:
+        if bot.HP < bot.max_HP:
+            draw_bar(screen, Vector2(bot.pos_render.x, bot.pos_render.y + 40), 50, 8, ANOTHER_GREEN, bot.HP,
+                     bot.max_HP)
 
 
 def draw_health_bars_for_food(screen, arr_food_to_render):

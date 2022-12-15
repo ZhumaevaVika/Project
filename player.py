@@ -156,9 +156,7 @@ class Player(pg.sprite.Sprite):
         """
         if choose_class_menu_on:
             if (79 <= event.pos[0] <= 121) and (213 <= event.pos[1] <= 226):
-                player_sprites.remove(self)
-                player, player_sprites = generate_player('Player', self)
-                choose_class_menu_on = False
+                pass
             if (20 <= event.pos[0] <= 95) and (50 <= event.pos[1] <= 125):
                 player_sprites.remove(self)
                 player, player_sprites = generate_player('Twin', self)
@@ -306,7 +304,7 @@ class Player(pg.sprite.Sprite):
         score_func = 0.3562 * self.level ** 3 - 5.8423 * self.level ** 2 + 67.4898 * self.level - 60
         if (self.XP >= score_func) and (self.level < 45):
             self.level += 1
-            self.max_HP = 50 + 2 * (self.level - 1)
+            self.max_HP = self.max_HP + 2 * (self.level - 1)
             self.HP += 2
             self.m += 0.5
             self.speed = self.impulse / self.m
@@ -436,7 +434,7 @@ class Player(pg.sprite.Sprite):
             else:
                 if bot in arr_bot_to_render:
                     arr_bot_to_render.remove(bot)
-        return bot_sprite_to_render
+        return bot_sprite_to_render, arr_bot_to_render
 
 
 class Bullet(pg.sprite.Sprite):
@@ -512,7 +510,7 @@ class Bullet(pg.sprite.Sprite):
         if self in bullets:
             self.death(bullets)
 
-    def damage_player(self, player, bot, bullets, arr_bot):
+    def damage_player(self, player, bot, bullets, arr_bot, arr_bot_to_render):
         if self.type == 'player':
             player = bot
             if (self.pos_render.x + self.shift.x - player.pos_render.x) ** 2 + \
@@ -521,6 +519,7 @@ class Bullet(pg.sprite.Sprite):
                 player.HP -= min(abs(self.damage), player.HP)
                 flag = 1
                 bot.death(arr_bot, player, flag)
+                bot.death(arr_bot_to_render, player, flag)
             if self in bullets:
                 self.death(bullets)
 
