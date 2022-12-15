@@ -9,14 +9,13 @@ class Player(pg.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
-        # A reference to the original image to preserve the quality.
         self.orig_image = pg.image.load('Sprites/tank.png')
         self.size = self.orig_image.get_size()
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
         self.rect = self.orig_image.get_rect()
         self.pos_render = Vector2(500, 375)
         self.pos = Vector2(randint(50, 9500), randint(50, 9500))
-        self.offset = Vector2(9, 1)  # We shift the sprite 50 px to the right.
+        self.offset = Vector2(9, 1)
         self.angle = 0
         self.len_gun = 35
         self.shoot_delay = 0
@@ -25,14 +24,14 @@ class Player(pg.sprite.Sprite):
         self.class_type = 'Tank'
         self.type = 'player'
 
-        self.regen = 3.12  # 3.12% per second
+        self.regen = 3.12
         self.max_HP = 50
         self.HP = 50
-        self.BD = 5  # Body_damage 30 HP
+        self.BD = 5
         self.bullet_speed = 4
         self.bullet_penetration = 7
         self.bullet_damage = 7
-        self.reload = 36  # Чем меньше reload, тем быстрее стреляет # FPS * время перезарядки # 36
+        self.reload = 36
 
         self.regen_points = 0
         self.max_HP_points = 0
@@ -53,7 +52,7 @@ class Player(pg.sprite.Sprite):
 
         if player is None:
             self.level = 1
-            self.XP = 0  # Score
+            self.XP = 0
             self.skill_points = 0
         else:
             self.pos = player.pos
@@ -149,7 +148,7 @@ class Player(pg.sprite.Sprite):
         
         event -- mouse click.
 
-        player.
+        player -- Player.
 
         player_sprites -- array of player sprites.
 
@@ -443,7 +442,6 @@ class Bullet(pg.sprite.Sprite):
         pos = player.pos
         super().__init__()
         self.image = pg.Surface((122, 70), pg.SRCALPHA)
-        # A reference to the original image to preserve the quality.
         self.orig_image = pg.image.load('Sprites/bullet_m.png')
         self.size = self.orig_image.get_size()
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.20), int(self.size[1] * 0.20)))
@@ -463,10 +461,9 @@ class Bullet(pg.sprite.Sprite):
         self.vx = 0
         self.vy = 0
         self.delta_vx = 0
-        self.delta_vy = 0  # Не точно
-        self.penetration = player.bullet_penetration  # Не точно
-        self.damage = player.bullet_damage  # 7 HP
-
+        self.delta_vy = 0
+        self.penetration = player.bullet_penetration
+        self.damage = player.bullet_damage
     def update(self, event, player):
         self.rotate()
         self.move(player)
@@ -476,11 +473,8 @@ class Bullet(pg.sprite.Sprite):
     def rotate(self):
         """Rotate the image of the sprite around a pivot point.
         """
-        # Rotate the image.
         self.image = pg.transform.rotozoom(self.orig_image, 0.01, 1)
-        # Rotate the offset vector.
         offset_rotated = self.offset.rotate(0.01)
-        # Create a new rect with the center of the sprite + the offset.
         if (self.type == 'bot') and (self.penetration < 7):
             self.rect = self.image.get_rect(center=self.pos_render + self.shift + offset_rotated)
         else:
