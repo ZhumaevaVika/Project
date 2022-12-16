@@ -292,7 +292,7 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
         draw_bar_with_text(screen, Vector2(width // 2, height - 45), 150, 12, GREEN, 1, 1,
                            "Score: " + str(player.XP))
     # Name
-    draw_text(screen, Vector2(width // 2, height - 60), 20, "Name")  # FIXME поменять имя игрока
+    draw_text(screen, Vector2(width // 2, height - 60), 20, "VIM")  # FIXME поменять имя игрока
     # upgrade bars
     if (player.skill_points > 0) or (upgrade_bars_flag > 0):
         bars_to_render.draw(screen)
