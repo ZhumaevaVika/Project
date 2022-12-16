@@ -8,6 +8,10 @@ import math
 
 class BotTwin(Twin):
     def __init__(self, player):
+        """BotTwin subclass constructor from Twin
+
+        :return: New BotTwin
+        """
         super().__init__(player)
         self.bot_type = 'twin'
         init_bot(self, player)
@@ -22,11 +26,15 @@ class BotTwin(Twin):
         shoot_bot(self, bullet_sprites, bullets, player)
 
     def death(self, arr_bot, player, flag=0):
-        death_bot(self, arr_bot, player, flag)
+        death_bot(self, arr_bot, player)
 
 
 class BotTwinBullet(TwinBullet):
     def __init__(self, bot_twin):
+        """BotTwinBullet subclass constructor from TwinBullet
+
+        :return: New BotTwinBullet
+        """
         super().__init__(bot_twin)
         self.bot_type = 'twin'
         init_bot_bullet(self)
@@ -40,11 +48,16 @@ class BotTwinBullet(TwinBullet):
 
 class BotSniper(Sniper):
     def __init__(self, player):
+        """BotSniper subclass constructor from Sniper
+
+        :return: New BotSniper
+        """
         super().__init__(player)
         self.bot_type = 'sniper'
         init_bot(self, player)
 
     def update(self, player, arr_bot):
+        update_bot(self, player, arr_bot)
         update_bot(self, player, arr_bot)
 
     def move(self, player):
@@ -53,12 +66,16 @@ class BotSniper(Sniper):
     def shoot(self, bullet_sprites, bullets, player):
         shoot_bot(self, bullet_sprites, bullets, player)
 
-    def death(self, arr_bot, player, flag=0):
-        death_bot(self, arr_bot, player, flag)
+    def death(self, arr_bot, player):
+        death_bot(self, arr_bot, player)
 
 
 class BotSniperBullet(Bullet):
     def __init__(self, bot_twin):
+        """BotSniperBullet subclass constructor from Bullet
+
+        :return: New BotSniperBullet
+        """
         super().__init__(bot_twin)
         self.bot_type = 'sniper'
         init_bot_bullet(self)
@@ -72,6 +89,10 @@ class BotSniperBullet(Bullet):
 
 class BotMachineGun(MachineGun):
     def __init__(self, player):
+        """BotMachineGun subclass constructor from MachineGun
+
+        :return: New BotMachineGun
+        """
         super().__init__(player)
         self.bot_type = 'machine_gun'
         init_bot(self, player)
@@ -85,12 +106,16 @@ class BotMachineGun(MachineGun):
     def shoot(self, bullet_sprites, bullets, player):
         shoot_bot(self, bullet_sprites, bullets, player)
 
-    def death(self, arr_bot, player, flag=0):
-        death_bot(self, arr_bot, player, flag)
+    def death(self, arr_bot, player):
+        death_bot(self, arr_bot, player)
 
 
 class BotMachineGunBullet(MachineGunBullet):
     def __init__(self, bot_twin):
+        """BotMachineGun subclass constructor from MachineGun
+
+        :return: New BotMachineGun
+        """
         super().__init__(bot_twin)
         self.bot_type = 'machine_gun'
         init_bot_bullet(self)
@@ -104,6 +129,10 @@ class BotMachineGunBullet(MachineGunBullet):
 
 class BotFlankGuard(FlankGuard):
     def __init__(self, player):
+        """BotFlankGuard subclass constructor from FlankGuard
+
+        :return: New BotFlankGuard
+        """
         super().__init__(player)
         self.bot_type = 'flank_guard'
         init_bot(self, player)
@@ -117,12 +146,16 @@ class BotFlankGuard(FlankGuard):
     def shoot(self, bullet_sprites, bullets, player):
         shoot_bot(self, bullet_sprites, bullets, player)
 
-    def death(self, arr_bot, player, flag=0):
-        death_bot(self, arr_bot, player, flag)
+    def death(self, arr_bot, player):
+        death_bot(self, arr_bot, player)
 
 
 class BotFlankGuardBulletFront(FlankGuardBulletFront):
     def __init__(self, bot_twin):
+        """BotFlankGuardBulletFront subclass constructor from FlankGuardBulletFront
+
+        :return: New BotFlankGuardBulletFront
+        """
         super().__init__(bot_twin)
         self.bot_type = 'flank_guard'
         init_bot_bullet(self)
@@ -136,6 +169,10 @@ class BotFlankGuardBulletFront(FlankGuardBulletFront):
 
 class BotFlankGuardBulletBack(FlankGuardBulletBack):
     def __init__(self, bot_twin):
+        """BotFlankGuardBulletBack subclass constructor from FlankGuardBulletBack
+
+        :return: New BotFlankGuardBulletBack
+        """
         super().__init__(bot_twin)
         self.bot_type = 'flank_guard'
         init_bot_bullet(self)
@@ -148,6 +185,10 @@ class BotFlankGuardBulletBack(FlankGuardBulletBack):
 
 
 def generate_bot(player, num_bots, arr_bot=None):
+    """Creates bots with random types
+
+    :return: Array with all existing bots
+    """
     if arr_bot is None:
         arr_bot = []
     for i in range(num_bots):
@@ -157,18 +198,36 @@ def generate_bot(player, num_bots, arr_bot=None):
 
 
 def init_bot(self, player):
+    """Initializes the bot depending on its type
+
+    :return: New bot
+    """
+    self.max_HP = 200
+    self.HP = 200
     if self.bot_type == 'twin':
         self.orig_image = pg.image.load('Sprites/twin_bot.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
+        self.reload = 14
+        self.bullet_damage = 18
+        self.bullet_speed = 6
     elif self.bot_type == 'sniper':
         self.orig_image = pg.image.load('Sprites/sniper_bot.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.4), int(self.size[1] * 0.36)))
+        self.bullet_speed = 8
+        self.bullet_damage = 24
+        self.speed = 6
     elif self.bot_type == 'machine_gun':
         self.orig_image = pg.image.load('Sprites/machine_gun_bot.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.36), int(self.size[1] * 0.36)))
+        self.reload = 12
+        self.speed = 6
+        self.BD = 24
     elif self.bot_type == 'flank_guard':
         self.orig_image = pg.image.load('Sprites/flank_guard_bot.png')
         self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.44), int(self.size[1] * 0.36)))
+        self.speed = 6
+        self.bullet_damage = 18
+        self.BD = 18
     self.pos = Vector2(randint(50, 9950), randint(50, 9950))
     self.pos_render = Vector2(self.pos.x - player.pos.x + 500, self.pos.y - player.pos.y + 375)
     self.type = 'bot'
@@ -176,6 +235,10 @@ def init_bot(self, player):
 
 
 def get_build(self):
+    """Sets the build to bots
+
+    :return: Bot skill points changes
+    """
     self.level = randint(21, 45)
     self.XP = int(0.3562 * self.level ** 3 - 5.8423 * self.level ** 2 + 67.4898 * self.level - 60) // 4
     if self.level < 30:
@@ -235,6 +298,10 @@ def smash_build(self):
 
 
 def update_bot(self, player, arr_bot):
+    """Rotate bot, move it towards player, check if death, check regeneration, update shoot delay
+
+    :return: Counting shoot delay
+    """
     if player.pos.x != self.pos.x:
         self.angle = math.atan((player.pos.y - self.pos.y) / (player.pos.x - self.pos.x))
     elif player.pos.x == self.pos.x:
@@ -257,6 +324,10 @@ def update_bot(self, player, arr_bot):
 
 
 def move_bot(self, player):
+    """Moves bot
+
+    :return: Change bot speed vector. Bot have acceleration and force of viscous friction
+    """
     x = 0
     y = 0
     k = self.impulse / self.m / 160
@@ -313,6 +384,10 @@ def move_bot(self, player):
 
 
 def shoot_bot(self, bullet_sprites, bullets, player):
+    """Shoots at the player
+
+    :return: Creates bullet, append it to bullet array and sprite group. Tank gets recoil
+    """
     try:
         if ((int(self.shoot_delay - 0.5) % self.reload == 0) and (self.bot_type == 'twin')) or (
                 (int(self.shoot_delay) % self.reload == 0) and (self.bot_type != 'twin')):
@@ -343,24 +418,33 @@ def shoot_bot(self, bullet_sprites, bullets, player):
         pass
 
 
-def death_bot(self, arr_bot, player, flag=0):
+def death_bot(self, arr_bot, player):
+    """Checks if bot is dead
+
+    :return: Remove died bot from array with bots, delete bot sprite from group, generates new bot
+    """
     if self.HP <= 0:
         self.kill()
-        if flag == 1:
-            player.XP += self.XP
-        print(player.XP)  # FIXME player.XP каждый раз обнуляется
         if self in arr_bot:
             arr_bot.remove(self)
         generate_bot(player, 1, arr_bot)
 
 
 def init_bot_bullet(self):
+    """Initializes the bot bullet
+
+    :return: New bullet
+    """
     self.orig_image = pg.image.load('Sprites/bullet_bot.png')
     self.orig_image = pg.transform.scale(self.orig_image, (int(self.size[0] * 0.20), int(self.size[1] * 0.20)))
     self.type = 'bot'
 
 
 def angle_update_bot_bullet(self, player):
+    """Updates bullet angle
+
+    :return: Bullet angle
+    """
     if player.pos.x != self.pos.x:
         self.angle = math.atan((player.pos.y - self.pos.y) / (player.pos.x - self.pos.x))
     elif player.pos.x == self.pos.x:
@@ -373,6 +457,11 @@ def angle_update_bot_bullet(self, player):
 
 
 def damage_player_bot_bullet(self, player, bullets):
+    """Allow bot bullets damage player
+
+    :return: Takes the player's hp away, takes the bullet's penetration away, check if player is dead,
+    check if bullet is dead
+    """
     if 0 < self.penetration < 7:
         if (self.pos_render.x + self.shift.x - player.pos_render.x) ** 2 + \
                 (self.pos_render.y + self.shift.y - player.pos_render.y) ** 2 <= (self.r + player.r) ** 2:
@@ -380,3 +469,7 @@ def damage_player_bot_bullet(self, player, bullets):
             player.HP -= min(abs(self.damage), player.HP)
             player.death(bullets, player)
             self.death(bullets)
+
+
+if __name__ == "__main__":
+    print("This module is not for direct call!")

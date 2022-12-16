@@ -7,9 +7,7 @@ class IgnoreButton(pygame.sprite.Sprite):
     def __init__(self, pos):
         """Creates ignore button
 
-        Arguments:
-
-        pos -- Vector2(), position.
+        :return: Button sprite
         """
         super().__init__()
         self.pos = pos
@@ -26,10 +24,7 @@ class PlayerClassSprite(pygame.sprite.Sprite):
     def __init__(self, class_type, pos):
         """Creates player class sprites
 
-        Arguments:
-
-        class_type -- class type
-        pos -- Vector2(), position
+        :return: Player class sprites
         """
         super().__init__()
         self.pos = pos
@@ -53,16 +48,7 @@ class UpgradeBar(pygame.sprite.Sprite):
     def __init__(self, pos, width, height, color, value, max_value, text, number_button):
         """Creates upgrade bar sprite
 
-        Arguments:
-
-        pos -- Vector2(), position
-        width -- screen width
-        height -- screen height
-        color -- color in RGB
-        value -- upgrade points
-        max_value -- max upgrade points
-        text -- name of bar
-        number_button -- number of button to upgrade
+        :return: Upgrade bar sprite
         """
         super().__init__()
         self.pos = pos
@@ -86,9 +72,7 @@ class UpgradeBar(pygame.sprite.Sprite):
     def update(self, new_value):
         """Updates value of upgrade bar
 
-        Arguments:
-
-        new_value -- new number of upgrade ponits
+        :return: Draw value of upgrade bar
         """
         if self.value != new_value:
             self.value = new_value
@@ -105,13 +89,7 @@ class UpgradeBar(pygame.sprite.Sprite):
 def draw_text(screen, pos, size, text, font='freesansbold.ttf'):
     """Draws text on screen
 
-    Arguments:
-
-    screen -- pygame.display.set_mode()
-    pos -- Vector2(), position
-    size -- size of font
-    text -- text
-    font -- type of font (default 'freesansbold.ttf')
+    :return: Draws text on screen
     """
     font = pygame.font.Font(font, size)
     text_main = font.render(text, True, WHITE)
@@ -136,15 +114,7 @@ def draw_text(screen, pos, size, text, font='freesansbold.ttf'):
 def draw_bar(screen, pos, width, height, color, value, max_value):
     """Draws bar
 
-    Arguments:
-
-    screen -- pygame.display.set_mode()
-    pos -- Vector2(), position
-    width -- width of screen in pixels
-    height -- height of screen in pixels
-    color -- color in RGB
-    value -- value
-    max_value -- max_value
+    :return: Draws bar
     """
     value_to_px = int((value / max_value) * width)
     # Gray borders of health bar line
@@ -162,17 +132,8 @@ def draw_bar(screen, pos, width, height, color, value, max_value):
 def draw_bar_with_text(screen, pos, width, height, color, value, max_value, text):
     """Draws bar with text
 
-        Arguments:
-
-        screen -- pygame.display.set_mode()
-        pos -- Vector2(), position
-        width -- width of screen in pixels
-        height -- height of screen in pixels
-        color -- color in RGB
-        value -- value
-        max_value -- max_value
-        text -- text
-        """
+    :return: Draws bar with text
+    """
     value_to_px = int((value / max_value) * width)
     font = pygame.font.Font('freesansbold.ttf', height - 2)
     text_main = font.render(text, True, WHITE)
@@ -207,17 +168,7 @@ def draw_bar_with_text(screen, pos, width, height, color, value, max_value, text
 def draw_upgrade_bar(screen, pos, width, height, color, value, max_value, text, number_button):
     """Draws upgrade bar
 
-    Arguments:
-
-    screen -- pygame.display.set_mode()
-    pos -- Vector2(), position
-    width -- width of screen in pixels
-    height -- height of screen in pixels
-    color -- color in RGB
-    value -- value
-    max_value -- max_value
-    text -- name of bar
-    number_button -- number of button to upgrade
+    :return: Draws upgrade bar
     """
     value_to_px = int((value / max_value) * (5 * width // 6))
     font = pygame.font.Font('freesansbold.ttf', height - 2)
@@ -265,10 +216,8 @@ def draw_upgrade_bar(screen, pos, width, height, color, value, max_value, text, 
 def create_upgrade_bars(height, player):
     """Creates upgrade bars
 
-    Arguments:
-
-    height -- height of screen in pixels
-    player -- Player
+    :return: health_regen, max_health, body_damage, bullet_speed, bullet_penetration, bullet_damage, reload,
+            movement_speed
     """
     health_regen = UpgradeBar(Vector2(10, height - 150), 140, 12, ORANGE, player.regen_points, 7, "Health Regen", 1)
     max_health = UpgradeBar(Vector2(10, height - 135), 140, 12, PURPLE, player.max_HP_points, 7, "Max Health", 2)
@@ -288,10 +237,7 @@ def create_upgrade_bars(height, player):
 def update_upgrade_bars(upgrade_bar_list, player):
     """Updates upgrade bars
 
-    Arguments:
-
-    upgrade_bar_list -- list of upgrade bars
-    player -- Player
+    :return: bars_to_render
     """
     upgrade_bar_list[0].update(player.regen_points)
     upgrade_bar_list[1].update(player.max_HP_points)
@@ -308,39 +254,33 @@ def update_upgrade_bars(upgrade_bar_list, player):
 def check_mouse_for_upgrade_bars(event, upgrade_bars_flag, player, height):
     """Changes upgrade_bars_flag when mouse is located in left-bottom part of the screen
 
-    Arguments:
-
-    event -- pygame.event.get()
-    upgrade_bars_flag -- number of seconds to show upgrade bars
-    player -- Player
-    height -- height of the screen
+    :return: upgrade_bars_flag
     """
-    if (upgrade_bars_flag == 0) and (0 <= event.pos[0] <= 170) and (height - 200 <= event.pos[1] <= height) and \
-            (player.skill_points == 0):
-        upgrade_bars_flag = 50
+    if event == (0, 0):
+        pass
+    else:
+        if (upgrade_bars_flag == 0) and (0 <= event.pos[0] <= 170) and (height - 200 <= event.pos[1] <= height) and \
+                (player.skill_points == 0):
+            upgrade_bars_flag = 50
     return upgrade_bars_flag
 
 
 def draw_bottom_interface(player, width, height, screen, top_score, bars_to_render, upgrade_bars_flag):
     """Draws player's nickname, score bar, level bar, upgrade bars, health bar
 
-    Arguments:
-
-    player -- Player
-    width -- width of screen in pixels
-    height -- height of screen in pixels
-    screen -- pygame.display.set_mode()
-    top_score -- top score
-    bars_to_render -- pygame.sprite.Group() of upgrade bars
-    upgrade_bars_flag -- number of seconds to show upgrade bars
+    :return: upgrade_bars_flag
     """
     # yellow level bar
     score_func = 0.3562 * player.level ** 3 - 5.8423 * player.level ** 2 + 67.4898 * player.level - 60
     if player.level != 1:
         score_func_1 = 0.3562 * (player.level - 1) ** 3 - 5.8423 * (player.level - 1) ** 2 + 67.4898 * \
                        (player.level - 1) - 60
-        draw_bar_with_text(screen, Vector2(width // 2, height - 30), 200, 12, YELLOW, player.XP - score_func_1,
-                           score_func - score_func_1, 'Lvl ' + str(player.level) + ' ' + player.class_type)
+        if player.level != 45:
+            draw_bar_with_text(screen, Vector2(width // 2, height - 30), 200, 12, YELLOW, player.XP - score_func_1,
+                               score_func - score_func_1, 'Lvl ' + str(player.level) + ' ' + player.class_type)
+        else:
+            draw_bar_with_text(screen, Vector2(width // 2, height - 30), 200, 12, YELLOW, 1,
+                               1, 'Lvl ' + str(player.level) + ' ' + player.class_type)
     else:
         draw_bar_with_text(screen, Vector2(width // 2, height - 30), 200, 12, YELLOW, player.XP,
                            score_func, 'Lvl ' + str(player.level) + ' ' + player.class_type)
@@ -372,13 +312,10 @@ def draw_bottom_interface(player, width, height, screen, top_score, bars_to_rend
 def draw_health_bars_for_bots(screen, arr_bot_to_render):
     """Draws health bars for bots
 
-    Arguments:
-
-    screen -- pygame.display.set_mode()
-    arr_bot_to_render -- list of bots which should be rendered
+    :return: Draws health bars for bots
     """
     for bot in arr_bot_to_render:
-        if bot.HP < bot.max_HP:
+        if (bot.HP < bot.max_HP) and (bot.HP > 0):
             draw_bar(screen, Vector2(bot.pos_render.x, bot.pos_render.y + 40), 50, 8, ANOTHER_GREEN, bot.HP,
                      bot.max_HP)
 
@@ -386,10 +323,7 @@ def draw_health_bars_for_bots(screen, arr_bot_to_render):
 def draw_health_bars_for_food(screen, arr_food_to_render):
     """Draws health bars for food
 
-    Arguments:
-
-    screen -- pygame.display.set_mode()
-    arr_food_to_render -- list of food which should be rendered
+    :return: Draws health bars for food
     """
     for food in arr_food_to_render:
         if (food.HP >= 0) and (food.HP < food.max_HP):
@@ -400,13 +334,7 @@ def draw_health_bars_for_food(screen, arr_food_to_render):
 def draw_background(width, height, screen, start_point, pos):
     """Draws background
 
-    Arguments:
-
-    width -- width of screen in pixels
-    height -- height of screen in pixels
-    screen -- pygame.display.set_mode()
-    start_point -- start_point of player in game in global coordinates
-    pos -- Vector2(), position
+    :return: Draws background
     """
     shift_x = - (pos.x - start_point.x) % 25
     shift_y = - (pos.y - start_point.y) % 25
@@ -430,11 +358,7 @@ def draw_background(width, height, screen, start_point, pos):
 def draw_die_screen(screen, score, level):
     """Draws level and score of player after his death
 
-    Arguments:
-
-    screen -- pygame.display.set_mode()
-    score -- player's score
-    level -- player's level
+    :return: Draws level and score of player after his death
     """
     text1 = 'Score: ' + str(score)
     text2 = 'Level: ' + str(level)
@@ -446,29 +370,28 @@ def draw_die_screen(screen, score, level):
 
 
 def create_class_sprites():
-    """Creates four player class sprites (PlayerClassSprite) for each player class"""
+    """Creates four player class sprites (PlayerClassSprite) for each player class
+
+    :return: class_sprites_to_render
+    """
     twin = PlayerClassSprite('Twin', Vector2(20, 50))
     sniper = PlayerClassSprite('Sniper', Vector2(100, 50))
-    machinegun = PlayerClassSprite('MachineGun', Vector2(20, 130))
-    flankguard = PlayerClassSprite('FlankGuard', Vector2(100, 130))
-    ignorebutton = IgnoreButton(Vector2(70, 210))
+    machine_gun = PlayerClassSprite('MachineGun', Vector2(20, 130))
+    flank_guard = PlayerClassSprite('FlankGuard', Vector2(100, 130))
+    ignore_button = IgnoreButton(Vector2(70, 210))
     class_sprites_to_render = pygame.sprite.Group()
     class_sprites_to_render.add(twin)
     class_sprites_to_render.add(sniper)
-    class_sprites_to_render.add(machinegun)
-    class_sprites_to_render.add(flankguard)
-    class_sprites_to_render.add(ignorebutton)
+    class_sprites_to_render.add(machine_gun)
+    class_sprites_to_render.add(flank_guard)
+    class_sprites_to_render.add(ignore_button)
     return class_sprites_to_render
 
 
 def choose_class_menu_launcher(choose_class_menu_on, choose_class_menu_on_flag, player):
     """Activates class menu when player's level reaches 15
 
-    Arguments:
-
-    choose_class_menu_on -- True if class menu is displaying, else False
-    choose_class_menu_on_flag -- 1 if class menu has displayed, else 0
-    player -- Player
+    :return: choose_class_menu_on, choose_class_menu_on_flag
     """
     if player.level == 15:
         if choose_class_menu_on_flag == 0:
@@ -480,11 +403,7 @@ def choose_class_menu_launcher(choose_class_menu_on, choose_class_menu_on_flag, 
 def draw_choose_class_menu(screen, class_sprites_to_render, choose_class_menu_on):
     """Draws class menu
 
-    Arguments:
-
-    screen -- pygame.display.set_mode()
-    class_sprites_to_render -- pygame.sprite.Group() of class buttons
-    choose_class_menu_on -- indicates when class menu should be drawn
+    :return: Draws class menu
     """
     if choose_class_menu_on:
         draw_text(screen, Vector2(100, 30), 20, 'Upgrades')

@@ -6,11 +6,9 @@ from random import randint, randrange, choice
 
 class Food(pg.sprite.Sprite):
     def __init__(self, filename):
-        """Class Food constructor.
-        
-        Arguments:
-        
-        filename -- filename.
+        """Class Food constructor
+
+        :return: New food dummy
         """
         super().__init__()
         pos = (randint(50, 9500), randint(50, 9500))
@@ -37,17 +35,23 @@ class Food(pg.sprite.Sprite):
         self.XP = 10
         self.m = 10
         self.has_not_health_bar = True
+        self.tpx = []
+        self.tpy = []
 
     def update(self):
-        """Updates food parameters.
+        """Move, rotate and check hit box
+
+        :return: Updates food parameters
         """
         self.move()
         self.angle += self.rotate_speed
         self.rotate()
-        self.generate_hitbox()
+        self.generate_hit_box()
 
     def rotate(self):
-        """Rotate the image of the sprite around a pivot point.
+        """Rotate the image of the sprite around a pivot point
+
+        :return: Sprite position
         """
         angle = self.angle * 180 / math.pi
         self.image = pg.transform.rotozoom(self.orig_image, -angle, 1)
@@ -55,7 +59,9 @@ class Food(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos_render + offset_rotated)
 
     def move(self):
-        """Moves food according to its speed, slows down food, if its speed is more than speed of generation.
+        """Moves food according to its speed, slows down food, if its speed is more than speed of generation
+
+        :return: Change food speed vector. Food have acceleration and force of viscous friction
         """
         speed = (self.vx ** 2 + self.vy ** 2) ** 0.5
         if speed > self.speed:
@@ -69,13 +75,10 @@ class Food(pg.sprite.Sprite):
             self.vy *= -1
 
     def death(self, arr_food, player):
-        """Delete sprite of food, if it was killed.
+        """Checks if food is dead
 
-        Arguments: 
-
-        arr_food -- array of food.
-
-        player -- Player.
+        :return: Delete sprite of food, if it was killed, remove food from array with food, generates new food,
+        increase player's XP
         """
         if self.HP <= 0:
             self.kill()
@@ -87,8 +90,10 @@ class Food(pg.sprite.Sprite):
                     player.XP += self.XP
             generate_food(arr_food, 1)
 
-    def generate_hitbox(self, r=0):
-        """generates x and y coordinates of tops of hitbox.
+    def generate_hit_box(self, r=0):
+        """Generates x and y coordinates of tops of hit box
+
+        :return: x and y coordinates of tops of hit box
         """
         angle = self.angle + self.delta
         x = self.pos.x
@@ -103,7 +108,9 @@ class Food(pg.sprite.Sprite):
 
 class Square(Food):
     def __init__(self):
-        """Subclass Sguare constructor.
+        """Subclass Square constructor from Food
+
+        :return: New Square
         """
         filename = 'Sprites/square.png'
         super().__init__(filename)
@@ -123,7 +130,9 @@ class Square(Food):
 
 class Triangle(Food):
     def __init__(self):
-        """Subclass Triangle constructor.
+        """Subclass Triangle constructor from Food
+
+        :return: New Triangle
         """
         filename = 'Sprites/triangle.png'
         super().__init__(filename)
@@ -143,7 +152,9 @@ class Triangle(Food):
 
 class Pentagon(Food):
     def __init__(self):
-        """Subclass Pentagon constructor.
+        """Subclass Pentagon constructor from Food
+
+        :return: New Pentagon
         """
         filename = 'Sprites/pentagon.png'
         super().__init__(filename)
@@ -163,7 +174,9 @@ class Pentagon(Food):
 
 class AlphaPentagon(Food):
     def __init__(self):
-        """Subclass AlphaPentagon constructor.
+        """Subclass AlphaPentagon constructor from Food
+
+        :return: New AlphaPentagon
         """
         filename = 'Sprites/alpha_pentagon.png'
         super().__init__(filename)
@@ -182,13 +195,9 @@ class AlphaPentagon(Food):
 
 
 def generate_food(arr_food, n_max):
-    """Generates food on the screen.
+    """Generates food on the screen
     
-    Arguments:
-    
-    arr_food -- array of food.
-    
-    n_max -- max number of food on the screen.
+    :return: Array with all food existing
     """
     variants = [0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 0, 0]
     for i in range(n_max):

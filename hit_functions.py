@@ -1,15 +1,7 @@
 def in_polygon(x, y, tpx, tpy):
-    """Checks whether point belongs to polygon.
+    """Checks whether point belongs to polygon
     
-    Arguments:
-    
-    x -- x coordinate of point.
-    
-    y -- y coordinate of point.
-    
-    tpx -- x coordinates of polygon tops.
-    
-    tpy -- y coordinates of polygon tops.
+    :return: True, if point belong to polygon
     """
     c = 0
     for i in range(len(tpx)):
@@ -21,13 +13,9 @@ def in_polygon(x, y, tpx, tpy):
 
 
 def objects_hit(f1, f2):
-    """Changes speed and coordinates of objects in collisions.
+    """Changes speed and coordinates of objects in collisions
     
-    Arguments:
-    
-    f1 -- object 1
-
-    f2 -- object 2
+    :return: Changes speed and coordinates of objects in collisions
     """
     xc = (f1.pos.x * f1.m + f2.pos.x * f2.m) / (f1.m + f2.m)
     yc = (f1.pos.y * f1.m + f2.pos.y * f2.m) / (f1.m + f2.m)
@@ -46,11 +34,9 @@ def objects_hit(f1, f2):
 
 
 def food_hit(arr_food_to_render):
-    """Hits food on the screen.
+    """Hits food on the screen
 
-    Arguments:
-
-    arr_food_to_render -- array of food on the screen.
+    :return: Process object hits
     """
     for i in range(len(arr_food_to_render) - 1):
         for j in range(i + 1, len(arr_food_to_render)):
@@ -61,13 +47,9 @@ def food_hit(arr_food_to_render):
 
 
 def bot_hit(arr_bot, player):
-    """Hits bots and player.
+    """Hits bots and player
     
-    Arguments:
-    
-    arr_bot -- array of bots
-    
-    player -- Player.
+    :return: Process object hits. Checks if bot or player are dead
     """
     hit_arr = arr_bot + [player]
     for i in range(len(hit_arr) - 1):
@@ -76,6 +58,21 @@ def bot_hit(arr_bot, player):
             f2 = hit_arr[j]
             if ((f1.pos.x - f2.pos.x) ** 2 + (f1.pos.y - f2.pos.y) ** 2) <= (f1.r + f2.r) ** 2:
                 objects_hit(f1, f2)
+                if (f1.type != f2.type) and (f2.type == 'player'):
+                    f1.HP -= min(f2.BD, f1.HP)
+                    f2.HP -= min(f1.BD, f2.HP)
+                    if int(f1.HP) <= 0:
+                        f2.XP += f1.XP
+
+
+def hit_interaction(player, arr_food, arr_food_to_render, arr_bot):
+    """Collection with hit functions
+
+    :return: Process collisions
+    """
+    player.hit_food(arr_food, arr_food_to_render)
+    food_hit(arr_food_to_render)
+    bot_hit(arr_bot, player)
 
 
 if __name__ == "__main__":
